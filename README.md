@@ -1,5 +1,8 @@
-<div align="center">
-  [![WOU Student Portal Header](public/header-preview.png)](https://FrankUsqAbant.github.io/document-student/)
+<p align="center">
+  <a href="https://FrankUsqAbant.github.io/document-student/">
+    <img src="https://raw.githubusercontent.com/FrankUsqAbant/document-student/main/public/header-preview.png" alt="WOU Student Portal Header" width="100%">
+  </a>
+</p>
 
 # 🎓 WOU Student Portal
 
