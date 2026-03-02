@@ -137,8 +137,11 @@ export const ClassSchedule: React.FC<ClassScheduleProps> = ({
                   style={{
                     ...S.td,
                     fontWeight: "700",
-                    fontSize: "10px",
+                    fontSize: "9px",
                     background: "#f0f4ff",
+                    padding: "10px 4px",
+                    whiteSpace: "nowrap",
+                    textAlign: "center",
                   }}
                 >
                   {slot}
@@ -173,14 +176,28 @@ export const ClassSchedule: React.FC<ClassScheduleProps> = ({
                         ...S.td,
                         background: c ? "#dbeafe" : hi % 2 ? "#f8f8fb" : "#fff",
                         fontSize: "10px",
+                        padding: "8px 6px",
+                        lineHeight: "1.4",
+                        verticalAlign: "top",
                       }}
                     >
                       {c ? (
-                        <>
-                          <strong>{c.code}</strong>
-                          <br />
-                          {c.classroom}
-                        </>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                          }}
+                        >
+                          <strong
+                            style={{ fontSize: "11px", color: "#1e293b" }}
+                          >
+                            {c.code}
+                          </strong>
+                          <span style={{ color: "#475569" }}>
+                            {c.classroom}
+                          </span>
+                        </div>
                       ) : (
                         ""
                       )}
