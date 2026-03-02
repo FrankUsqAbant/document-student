@@ -1,5 +1,7 @@
 <div align="center">
-  <img src="public/header-preview.png" alt="WOU Student Portal Header" width="100%" />
+  <a href="https://FrankUsqAbant.github.io/document-student/" target="_blank">
+    <img src="public/header-preview.png" alt="WOU Student Portal Header" width="100%" />
+  </a>
 
 # 🎓 WOU Student Portal
 
