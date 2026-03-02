@@ -10,7 +10,7 @@ export const INSTITUTION = {
   treasurer: "Lic. Marco Solís Pérez",
   rector: "Dr. Andrés Morales Ulate",
   city: "Monmouth, Oregon",
-  logo: "/assets/wou-logo.png",
+  logo: "/document-student/assets/wou-logo.png",
 };
 
 export const DOC_TYPES = [
