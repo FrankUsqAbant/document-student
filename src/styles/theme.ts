@@ -6,7 +6,7 @@ export const S: Record<string, any> = {
     backgroundColor: "#faf9f5",
     background: "#faf9f5",
     color: "#0f172a",
-    colorScheme: "light",
+    colorScheme: "only light",
     forcedColorAdjust: "none",
     width: "100%",
     maxWidth: "760px",
