@@ -181,13 +181,22 @@ a {
 }
 
 /* ===== Document Paper Sheet Styling & Realistic Desk Shadow ===== */
-.document-desk-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  padding: 24px 16px;
-  overflow-x: auto;
+#doc-preview,
+#doc-preview *,
+.document-sheet-wrapper,
+.document-sheet-wrapper *,
+[data-theme="paper"],
+[data-theme="paper"] * {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+#doc-preview {
+  background-color: #faf9f5 !important;
+  color: #0f172a !important;
+  display: block;
 }
 
 .document-sheet-wrapper {
@@ -197,15 +206,8 @@ a {
 
 /* ===== Responsive Layout Classes ===== */
 @media (max-width: 1024px) {
-  .studio-split-layout {
-    flex-direction: column !important;
-  }
-  .studio-editor-panel {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  .studio-preview-panel {
-    width: 100% !important;
+  .studio-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 

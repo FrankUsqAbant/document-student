@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
+// Data & Constants
 import { INSTITUTION, DOC_TYPES } from "./data/constants";
 import { SAMPLE } from "./data/sampleData";
-import { t } from "./i18n/translations";
 import type { Lang } from "./i18n/translations";
 
 // Document Templates
@@ -16,10 +16,10 @@ import {
   OfficialLetter,
 } from "./templates";
 
-// Form Components
+// Advanced Form Editor
 import { DynamicForm } from "./components/forms/DynamicForm";
 
-// Preset Student Profiles for Instant Realism
+// Realistic Student Profiles
 const PRESETS = [
   {
     id: "ethan",
@@ -50,29 +50,31 @@ const PRESETS = [
     level: "Undergraduate — Sophomore",
     email: "c.mendoza@wou.edu",
     photo: "./assets/student_portrait.webp",
-  }
+  },
 ];
 
 export default function App() {
-  const [active, setActive] = useState("studentCard");
+  const [active, setActive] = useState("transcript");
   const [docData, setDocData] = useState(SAMPLE);
   const [instState, setInstState] = useState(INSTITUTION);
   const [lang, setLang] = useState<Lang>("en");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-  const [mobileTab, setMobileTab] = useState<"preview" | "editor">("preview");
+  const [term, setTerm] = useState("Spring 2025");
+  const [delivery, setDelivery] = useState("Digital PDF (300 DPI)");
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [zoom, setZoom] = useState(0.85);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  // Auto-fit zoom on window resize
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (window.innerWidth >= 1400) {
-        setZoom(0.88);
-      } else if (window.innerWidth >= 1100) {
-        setZoom(0.72);
+      if (window.innerWidth >= 1440) {
+        setZoom(0.85);
+      } else if (window.innerWidth >= 1200) {
+        setZoom(0.74);
+      } else if (window.innerWidth >= 900) {
+        setZoom(0.62);
       } else {
-        setZoom(0.65);
+        setZoom(0.5);
       }
     };
     handleResize();
@@ -80,76 +82,50 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleDataChange = useCallback((newData: any) => {
-    setDocData((prev) => ({ ...prev, [active]: newData }));
-  }, [active]);
+  const handleDataChange = useCallback(
+    (newData: any) => {
+      setDocData((prev) => ({ ...prev, [active]: newData }));
+    },
+    [active]
+  );
 
   const handleInstChange = useCallback((newInst: any) => {
     setInstState(newInst);
   }, []);
 
-  // Load a quick preset profile
-  const handleLoadPreset = useCallback((presetId: string) => {
-    const preset = PRESETS.find((p) => p.id === presetId);
-    if (!preset) return;
+  // Quick preset loader
+  const handleLoadPreset = useCallback(
+    (presetId: string) => {
+      const preset = PRESETS.find((p) => p.id === presetId);
+      if (!preset) return;
 
-    setDocData((prev) => {
-      const currentData = prev[active as keyof typeof SAMPLE] as any;
-      return {
-        ...prev,
-        [active]: {
-          ...currentData,
-          studentName: preset.name,
-          studentId: preset.studentId,
-          nationalId: preset.nationalId,
-          program: preset.program,
-          level: preset.level,
-          email: preset.email,
-          photo: preset.photo,
-        },
-      };
-    });
-  }, [active]);
-
-  // Custom photo upload handler
-  const handlePhotoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      const base64Photo = uploadEvent.target?.result as string;
       setDocData((prev) => {
         const currentData = prev[active as keyof typeof SAMPLE] as any;
         return {
           ...prev,
           [active]: {
             ...currentData,
-            photo: base64Photo,
+            studentName: preset.name,
+            studentId: preset.studentId,
+            nationalId: preset.nationalId,
+            program: preset.program,
+            level: preset.level,
+            email: preset.email,
+            photo: preset.photo,
           },
         };
       });
-    };
-    reader.readAsDataURL(file);
-  }, [active]);
+    },
+    [active]
+  );
 
-  // Print filename builder
+  // Print & PDF Export
   const getPrintTitle = useCallback(() => {
     const studentId =
       (docData[active as keyof typeof SAMPLE] as any)?.studentId || "987654373";
     const now = new Date();
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
-    const docNames: Record<string, string> = {
-      studentCard: "Official_Student_ID",
-      schedule: "Official_Class_Schedule",
-      tuitionReceipt: "Tuition_Statement",
-      transcript: "Academic_Transcript",
-      registrationReceipt: "Registration_Receipt",
-      enrollmentVerification: "Enrollment_Verification",
-      officialLetter: "Official_Verification_Letter",
-    };
-    const docName = docNames[active] || "Document";
-    return `WOU_${docName}_${studentId}_${dateStr}`;
+    return `WOU_${active}_${studentId}_${dateStr}`;
   }, [active, docData]);
 
   const handlePrint = useCallback(() => {
@@ -159,15 +135,15 @@ export default function App() {
 
     const originalTitle = document.title;
     document.title = getPrintTitle();
-
     printRoot.innerHTML = preview.innerHTML;
     printRoot.style.display = "block";
     setTimeout(() => {
       window.print();
       document.title = originalTitle;
-    }, 100);
+    }, 120);
   }, [getPrintTitle]);
 
+  // Real-time Document Renderer
   const renderedDocument = useMemo(() => {
     const data = docData[active as keyof typeof SAMPLE];
     switch (active) {
@@ -190,524 +166,553 @@ export default function App() {
     }
   }, [active, docData, instState, lang]);
 
-  return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-studio)" }}>
-      {/* ===== SWISS EDITORIAL HEADER ===== */}
-      <header
-        style={{
-          background: "#080c14",
-          borderBottom: "1px solid #1e2638",
-          padding: "14px 28px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-          gap: "16px",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Brand & Status */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: 0 }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "8px",
-              background: "#0d131f",
-              border: "1px solid #d4af37",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "18px",
-              color: "#d4af37",
-              flexShrink: 0,
-            }}
-          >
-            🏛
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: isMobile ? "15px" : "17px",
-                  fontWeight: "800",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                  color: "#f8fafc",
-                  fontFamily: "'Inter', sans-serif",
-                }}
-              >
-                WOU Academic Document Studio
-              </h1>
-              <span
-                style={{
-                  background: "rgba(16, 185, 129, 0.12)",
-                  color: "#10b981",
-                  border: "1px solid rgba(16, 185, 129, 0.3)",
-                  padding: "2px 8px",
-                  borderRadius: "4px",
-                  fontSize: "9.5px",
-                  fontWeight: "700",
-                  letterSpacing: "0.08em",
-                  fontFamily: "'JetBrains Mono', monospace",
-                }}
-              >
-                ● 300 DPI ENGINE
-              </span>
-            </div>
-            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px", fontFamily: "'Inter', sans-serif" }}>
-              Western Oregon University · Office of the Registrar
-            </div>
-          </div>
-        </div>
+  const currentStudent = (docData[active as keyof typeof SAMPLE] as any) || {};
 
-        {/* Global Controls & Primary Action */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-          {/* Quick Preset Selector */}
-          <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: "6px" }}>
-            <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: "'JetBrains Mono', monospace" }}>
-              Perfil:
-            </span>
-            <select
-              onChange={(e) => handleLoadPreset(e.target.value)}
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#080c14",
+        color: "#f8fafc",
+        padding: "32px 24px",
+        fontFamily: "'Inter', sans-serif",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Top Editorial Title Banner (Exact Match to Option 3 Mockup) */}
+      <div style={{ maxWidth: "1480px", margin: "0 auto 24px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+          <div>
+            <h1
               style={{
-                background: "#0d131f",
-                color: "#f8fafc",
-                border: "1px solid #1e2638",
-                padding: "6px 10px",
+                fontSize: "20px",
+                fontWeight: "700",
+                color: "#ffffff",
+                letterSpacing: "-0.01em",
+                margin: "0 0 6px 0",
+              }}
+            >
+              Swiss Editorial & Minimalist Studio Pro
+            </h1>
+            <p style={{ fontSize: "12.5px", color: "#94a3b8", margin: 0, maxWidth: "800px", lineHeight: "1.4" }}>
+              {lang === "en"
+                ? "High-contrast ultra-minimalism in deep charcoal and warm parchment canvas. Clean A4 reading and export with high-fidelity digital seals and signatures."
+                : "Ultra-minimalismo de alto contraste en carbón oscuro y lienzo apergaminado cálido. Enfoque centrado en la lectura y exportación limpia de hojas A4 con sellos y firmas digitales con alta fidelidad gráfica."}
+            </p>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={() => setLang(lang === "en" ? "es" : "en")}
+              style={{
+                background: "#121826",
+                color: "#d4af37",
+                border: "1px solid #1e293b",
+                padding: "6px 14px",
                 borderRadius: "6px",
                 fontSize: "12px",
+                fontWeight: "700",
                 cursor: "pointer",
-                outline: "none",
+                fontFamily: "'JetBrains Mono', monospace",
               }}
             >
-              {PRESETS.map((p) => (
-                <option key={p.id} value={p.id} style={{ background: "#0d131f", color: "#f8fafc" }}>
-                  {p.name} ({p.program.split("&")[0].trim()})
-                </option>
-              ))}
-            </select>
+              {lang === "en" ? "🇺🇸 English" : "🇪🇸 Español"}
+            </button>
           </div>
-
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLang(lang === "en" ? "es" : "en")}
-            style={{
-              background: "#0d131f",
-              color: "#d4af37",
-              border: "1px solid #1e2638",
-              padding: "8px 14px",
-              borderRadius: "6px",
-              fontSize: "12px",
-              fontWeight: "700",
-              cursor: "pointer",
-              fontFamily: "'JetBrains Mono', monospace",
-              transition: "all 0.2s ease",
-            }}
-          >
-            {lang === "en" ? "🇺🇸 EN" : "🇪🇸 ES"}
-          </button>
-
-          {/* Master Print/PDF Button */}
-          <button
-            onClick={handlePrint}
-            style={{
-              background: "linear-gradient(135deg, #d4af37 0%, #b89628 100%)",
-              color: "#0a0f1c",
-              border: "none",
-              padding: isMobile ? "9px 18px" : "10px 24px",
-              borderRadius: "6px",
-              fontSize: isMobile ? "12px" : "13px",
-              fontWeight: "800",
-              letterSpacing: "0.04em",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              boxShadow: "0 4px 14px rgba(212, 175, 55, 0.3)",
-              transition: "transform 0.15s ease, box-shadow 0.15s ease",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(212, 175, 55, 0.45)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 4px 14px rgba(212, 175, 55, 0.3)";
-            }}
-          >
-            🖨 {t(lang, "printDocument")}
-          </button>
         </div>
-      </header>
+      </div>
 
-      {/* ===== SEGMENTED DOCUMENT TYPES BAR ===== */}
-      <nav
-        className="tabs-scroll"
+      {/* ===== UNIFIED STUDIO CARD CONTAINER (Option 3 Architecture) ===== */}
+      <div
         style={{
-          background: "#0a0e17",
-          borderBottom: "1px solid #1e2638",
-          padding: "0 24px",
-          gap: "4px",
-          position: "sticky",
-          top: "65px",
-          zIndex: 90,
+          maxWidth: "1480px",
+          margin: "0 auto",
+          background: "#0d131f",
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+          borderRadius: "16px",
+          padding: "32px",
+          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.06)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "28px",
         }}
       >
-        {DOC_TYPES.map((doc) => {
-          const isActive = active === doc.key;
-          return (
-            <button
-              key={doc.key}
-              onClick={() => setActive(doc.key)}
-              style={{
-                padding: "12px 18px",
-                background: isActive ? "rgba(212, 175, 55, 0.08)" : "transparent",
-                color: isActive ? "#d4af37" : "#94a3b8",
-                border: "none",
-                borderBottom: isActive ? "2.5px solid #d4af37" : "2.5px solid transparent",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: isActive ? "700" : "500",
-                letterSpacing: "0.02em",
-                whiteSpace: "nowrap",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "all 0.2s ease",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              <span>{doc.icon}</span>
-              <span>{doc[lang]}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* ===== MOBILE SWITCHER BAR (Visible on screens < 1024px) ===== */}
-      {isMobile && (
         <div
           style={{
-            background: "#0f172a",
-            padding: "8px 16px",
-            display: "flex",
-            gap: "8px",
-            borderBottom: "1px solid #1e2638",
-            position: "sticky",
-            top: "109px",
-            zIndex: 85,
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.25fr) minmax(360px, 1fr)",
+            gap: "36px",
+            alignItems: "start",
           }}
+          className="studio-grid"
         >
-          <button
-            onClick={() => setMobileTab("preview")}
+          {/* ================= LEFT: LIVE A4 DOCUMENT CANVAS ================= */}
+          <div
             style={{
-              flex: 1,
-              padding: "8px",
-              borderRadius: "6px",
-              border: "1px solid",
-              borderColor: mobileTab === "preview" ? "#d4af37" : "#334155",
-              background: mobileTab === "preview" ? "rgba(212, 175, 55, 0.15)" : "#080c14",
-              color: mobileTab === "preview" ? "#d4af37" : "#94a3b8",
-              fontSize: "12px",
-              fontWeight: "700",
-              cursor: "pointer",
-            }}
-          >
-            👁️ Vista Previa en Vivo
-          </button>
-          <button
-            onClick={() => setMobileTab("editor")}
-            style={{
-              flex: 1,
-              padding: "8px",
-              borderRadius: "6px",
-              border: "1px solid",
-              borderColor: mobileTab === "editor" ? "#d4af37" : "#334155",
-              background: mobileTab === "editor" ? "rgba(212, 175, 55, 0.15)" : "#080c14",
-              color: mobileTab === "editor" ? "#d4af37" : "#94a3b8",
-              fontSize: "12px",
-              fontWeight: "700",
-              cursor: "pointer",
-            }}
-          >
-            ✏️ Editor & Ajustes
-          </button>
-        </div>
-      )}
-
-      {/* ===== MAIN STUDIO SPLIT VIEW ===== */}
-      <main
-        className="studio-split-layout"
-        style={{
-          display: "flex",
-          flex: 1,
-          minHeight: "calc(100vh - 120px)",
-          background: "#070a12",
-        }}
-      >
-        {/* LEFT / CENTER: INTERACTIVE LIVE DOCUMENT CANVAS */}
-        {(!isMobile || mobileTab === "preview") && (
-          <section
-            className="studio-preview-panel"
-            style={{
-              flex: 1,
+              background: "#080c14",
+              borderRadius: "12px",
+              border: "1px solid #1e2638",
+              padding: "24px 16px",
               display: "flex",
               flexDirection: "column",
-              borderRight: isMobile ? "none" : "1px solid #1e2638",
-              minWidth: 0,
+              alignItems: "center",
+              minHeight: "780px",
+              overflow: "hidden",
+              position: "relative",
             }}
           >
-            {/* Canvas Toolbar (Zoom & Status) */}
+            {/* Minimalist Canvas Toolbar */}
             <div
               style={{
-                padding: "10px 24px",
-                background: "rgba(13, 19, 31, 0.8)",
-                backdropFilter: "blur(8px)",
-                borderBottom: "1px solid #1e2638",
+                width: "100%",
+                maxWidth: "760px",
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "space-between",
-                gap: "12px",
-                flexWrap: "wrap",
+                alignItems: "center",
+                marginBottom: "18px",
+                padding: "0 8px",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: "'JetBrains Mono', monospace" }}>
-                  DOCUMENTO:
+                <span style={{ fontSize: "11px", fontWeight: "700", color: "#d4af37", fontFamily: "'JetBrains Mono', monospace" }}>
+                  A4 DOCUMENT PREVIEW
                 </span>
-                <span style={{ fontSize: "11px", fontWeight: "700", color: "#f8fafc" }}>
-                  {DOC_TYPES.find((d) => d.key === active)?.[lang]}
-                </span>
-                <span style={{ fontSize: "10px", color: "#64748b" }}>· A4 / US Letter (300 DPI)</span>
+                <span style={{ fontSize: "10px", color: "#64748b" }}>· 300 DPI READY</span>
               </div>
 
-              {/* Zoom Controls */}
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <button
-                  onClick={() => setZoom(Math.max(0.45, zoom - 0.08))}
-                  title="Alejar"
+                  onClick={() => setZoom(Math.max(0.45, zoom - 0.06))}
                   style={{
-                    background: "#080c14",
+                    background: "#121826",
                     color: "#cbd5e1",
-                    border: "1px solid #1e2638",
-                    width: "28px",
-                    height: "28px",
+                    border: "1px solid #1e293b",
+                    width: "26px",
+                    height: "26px",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: "700",
+                    fontSize: "12px",
+                    fontWeight: "bold",
                   }}
                 >
                   -
                 </button>
-                <span style={{ fontSize: "11px", color: "#d4af37", width: "42px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ fontSize: "11px", color: "#cbd5e1", width: "40px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
                   {Math.round(zoom * 100)}%
                 </span>
                 <button
-                  onClick={() => setZoom(Math.min(1.25, zoom + 0.08))}
-                  title="Acercar"
+                  onClick={() => setZoom(Math.min(1.15, zoom + 0.06))}
                   style={{
-                    background: "#080c14",
+                    background: "#121826",
                     color: "#cbd5e1",
                     border: "1px solid #1e2638",
-                    width: "28px",
-                    height: "28px",
+                    width: "26px",
+                    height: "26px",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: "700",
+                    fontSize: "12px",
+                    fontWeight: "bold",
                   }}
                 >
                   +
                 </button>
-                <button
-                  onClick={() => setZoom(0.85)}
-                  title="Ajustar a 85%"
+              </div>
+            </div>
+
+            {/* Document Sheet (With strict light scheme protection) */}
+            <div
+              className="document-sheet-wrapper"
+              ref={previewRef}
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: "top center",
+                transition: "transform 0.15s ease-out",
+                margin: "0 auto",
+              }}
+            >
+              <div id="doc-preview" data-theme="paper">
+                {renderedDocument}
+              </div>
+            </div>
+          </div>
+
+          {/* ================= RIGHT: SWISS EDITORIAL PANEL ================= */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+            {/* Header Typography (Exact Match to Option 3) */}
+            <div>
+              <h2
+                style={{
+                  fontSize: "26px",
+                  fontWeight: "900",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: "#ffffff",
+                  lineHeight: "1.1",
+                  margin: 0,
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                UNIVERSITY DOCUMENT<br />GENERATOR
+              </h2>
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  letterSpacing: "0.1em",
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  marginTop: "6px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                WOU STUDENT PORTAL
+              </div>
+            </div>
+
+            <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.1)" }} />
+
+            {/* Select Document Type */}
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  color: "#cbd5e1",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  marginBottom: "10px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {lang === "en" ? "Select Document Type" : "Seleccionar Tipo de Documento"}
+              </label>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {DOC_TYPES.map((doc) => {
+                  const isSelected = active === doc.key;
+                  return (
+                    <label
+                      key={doc.key}
+                      onClick={() => setActive(doc.key)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        background: isSelected ? "rgba(212, 175, 55, 0.12)" : "rgba(255, 255, 255, 0.03)",
+                        border: isSelected ? "1px solid #d4af37" : "1px solid rgba(255, 255, 255, 0.06)",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        color: isSelected ? "#ffffff" : "#94a3b8",
+                        fontWeight: isSelected ? "600" : "400",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="docType"
+                        checked={isSelected}
+                        onChange={() => setActive(doc.key)}
+                        style={{ accentColor: "#d4af37", cursor: "pointer" }}
+                      />
+                      <span>{doc.icon}</span>
+                      <span>{doc[lang]}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Form Input Grid (2 Columns) */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+              {/* Student ID */}
+              <div>
+                <label
                   style={{
-                    background: "#080c14",
-                    color: "#94a3b8",
-                    border: "1px solid #1e2638",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
+                    display: "block",
                     fontSize: "10.5px",
-                    cursor: "pointer",
+                    fontWeight: "700",
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "6px",
                     fontFamily: "'JetBrains Mono', monospace",
                   }}
                 >
-                  Reset
-                </button>
+                  Student ID
+                </label>
+                <input
+                  type="text"
+                  value={currentStudent.studentId || "987654373"}
+                  onChange={(e) =>
+                    handleDataChange({ ...currentStudent, studentId: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    background: "#080c14",
+                    border: "1px solid #1e2638",
+                    borderRadius: "6px",
+                    padding: "10px 12px",
+                    color: "#f8fafc",
+                    fontSize: "13px",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </div>
+
+              {/* Student Profile Selector */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "10.5px",
+                    fontWeight: "700",
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "6px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  Student
+                </label>
+                <select
+                  onChange={(e) => handleLoadPreset(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "#080c14",
+                    border: "1px solid #1e2638",
+                    borderRadius: "6px",
+                    padding: "10px 12px",
+                    color: "#f8fafc",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  {PRESETS.map((p) => (
+                    <option key={p.id} value={p.id} style={{ background: "#080c14", color: "#f8fafc" }}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Term */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "10.5px",
+                    fontWeight: "700",
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "6px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  Term
+                </label>
+                <select
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "#080c14",
+                    border: "1px solid #1e2638",
+                    borderRadius: "6px",
+                    padding: "10px 12px",
+                    color: "#f8fafc",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <option value="Spring 2025" style={{ background: "#080c14", color: "#f8fafc" }}>Spring 2025</option>
+                  <option value="Fall 2024" style={{ background: "#080c14", color: "#f8fafc" }}>Fall 2024</option>
+                  <option value="Winter 2025" style={{ background: "#080c14", color: "#f8fafc" }}>Winter 2025</option>
+                  <option value="Summer 2024" style={{ background: "#080c14", color: "#f8fafc" }}>Summer 2024</option>
+                </select>
+              </div>
+
+              {/* Delivery */}
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "10.5px",
+                    fontWeight: "700",
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: "6px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  Delivery
+                </label>
+                <select
+                  value={delivery}
+                  onChange={(e) => setDelivery(e.target.value)}
+                  style={{
+                    width: "100%",
+                    background: "#080c14",
+                    border: "1px solid #1e2638",
+                    borderRadius: "6px",
+                    padding: "10px 12px",
+                    color: "#f8fafc",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <option value="Digital PDF (300 DPI)" style={{ background: "#080c14", color: "#f8fafc" }}>Digital PDF</option>
+                  <option value="Official Verification Sheet" style={{ background: "#080c14", color: "#f8fafc" }}>Verification Sheet</option>
+                </select>
               </div>
             </div>
 
-            {/* Document Sheet Desk Container */}
-            <div
-              className="document-desk-container"
-              style={{
-                flex: 1,
-                padding: "36px 16px 60px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                overflowY: "auto",
-                overflowX: "auto",
-              }}
-            >
-              <div
-                className="document-sheet-wrapper"
-                ref={previewRef}
+            {/* Advanced Field Customizer Accordion */}
+            <div style={{ marginTop: "4px" }}>
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
                 style={{
-                  transform: `scale(${zoom})`,
-                  transformOrigin: "top center",
-                  transition: "transform 0.15s ease-out",
-                  margin: "0 auto",
+                  background: "transparent",
+                  color: "#d4af37",
+                  border: "none",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  padding: "4px 0",
                 }}
               >
-                <div id="doc-preview">
-                  {renderedDocument}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
+                <span>{showAdvanced ? "▾" : "▸"}</span>
+                <span>{showAdvanced ? "Ocultar Personalizador Detallado" : "⚙️ Personalizar Datos Detallados (Notas, Cursos, Fechas)"}</span>
+              </button>
 
-        {/* RIGHT: SWISS EDITORIAL PRECISION EDITOR */}
-        {(!isMobile || mobileTab === "editor") && (
-          <aside
-            className="studio-editor-panel"
-            style={{
-              width: isMobile ? "100%" : "440px",
-              background: "#0a0e17",
-              display: "flex",
-              flexDirection: "column",
-              overflowY: "auto",
-              padding: "24px",
-              boxSizing: "border-box",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px", borderBottom: "1px solid #1e2638", paddingBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "14px" }}>⚙️</span>
-                <h2 style={{ fontSize: "13px", fontWeight: "800", color: "#f8fafc", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>
-                  {lang === "en" ? "Document Customizer" : "Personalizar Documento"}
-                </h2>
-              </div>
-              <span style={{ fontSize: "10.5px", color: "#d4af37", fontFamily: "'JetBrains Mono', monospace" }}>
-                LIVE SYNC
-              </span>
-            </div>
-
-            {/* Photo Upload Section (Especially handy for Student ID Card) */}
-            {active === "studentCard" && (
-              <div
-                style={{
-                  background: "#080c14",
-                  border: "1px solid #1e2638",
-                  borderRadius: "8px",
-                  padding: "14px",
-                  marginBottom: "20px",
-                }}
-              >
-                <div style={{ fontSize: "10.5px", fontWeight: "700", color: "#d4af37", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px", fontFamily: "'JetBrains Mono', monospace" }}>
-                  📸 {lang === "en" ? "Student ID Portrait" : "Foto del Estudiante"}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                  <img
-                    src={(docData.studentCard as any)?.photo || "./assets/student_portrait.webp"}
-                    alt="Current Portrait"
-                    style={{
-                      width: "48px",
-                      height: "56px",
-                      borderRadius: "6px",
-                      objectFit: "cover",
-                      border: "1.5px solid #d4af37",
-                    }}
+              {showAdvanced && (
+                <div
+                  style={{
+                    marginTop: "14px",
+                    padding: "18px",
+                    background: "#080c14",
+                    borderRadius: "8px",
+                    border: "1px solid #1e2638",
+                    maxHeight: "380px",
+                    overflowY: "auto",
+                  }}
+                >
+                  <DynamicForm
+                    activeDoc={active}
+                    data={docData[active as keyof typeof SAMPLE]}
+                    lang={lang}
+                    onChange={handleDataChange}
+                    instData={instState}
+                    onInstChange={handleInstChange}
                   />
-                  <div style={{ flex: 1 }}>
-                    <label
-                      style={{
-                        display: "inline-block",
-                        background: "#1e2638",
-                        color: "#f8fafc",
-                        padding: "6px 12px",
-                        borderRadius: "5px",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                        cursor: "pointer",
-                        border: "1px solid #334155",
-                      }}
-                    >
-                      {lang === "en" ? "Upload Custom Photo" : "Subir Otra Foto"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        style={{ display: "none" }}
-                      />
-                    </label>
-                    <button
-                      onClick={() => {
-                        const current = docData.studentCard as any;
-                        handleDataChange({ ...current, photo: "./assets/student_portrait.webp" });
-                      }}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#64748b",
-                        fontSize: "10px",
-                        marginLeft: "8px",
-                        cursor: "pointer",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Default
-                    </button>
-                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Dynamic Form for Current Active Document */}
-            <div style={{ flex: 1 }}>
-              <DynamicForm
-                activeDoc={active}
-                data={docData[active as keyof typeof SAMPLE]}
-                lang={lang}
-                onChange={handleDataChange}
-                instData={instState}
-                onInstChange={handleInstChange}
-              />
+              )}
             </div>
-          </aside>
-        )}
-      </main>
 
-      {/* ===== SWISS FOOTER ===== */}
-      <footer
-        style={{
-          background: "#060910",
-          borderTop: "1px solid #1e2638",
-          padding: "14px 28px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          fontSize: "11px",
-          color: "#475569",
-          fontFamily: "'Inter', sans-serif",
-          flexWrap: "wrap",
-          gap: "10px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ color: "#d4af37", fontWeight: "700" }}>WESTERN OREGON UNIVERSITY</span>
-          <span>·</span>
-          <span>Office of the Registrar (Monmouth, Oregon)</span>
+            {/* Action Buttons (Exact Match to Option 3 Mockup) */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
+              {/* Preview Document Button (Dark Pill) */}
+              <button
+                onClick={() => {
+                  previewRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
+                style={{
+                  background: "#1c2333",
+                  color: "#cbd5e1",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  padding: "14px",
+                  borderRadius: "8px",
+                  fontSize: "12.5px",
+                  fontWeight: "700",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.background = "#242d42")}
+                onMouseOut={(e) => (e.currentTarget.style.background = "#1c2333")}
+              >
+                PREVIEW DOCUMENT
+              </button>
+
+              {/* Generate & Download Master Button (Cream/White Pill) */}
+              <button
+                onClick={handlePrint}
+                style={{
+                  background: "#faf8f5",
+                  color: "#0f172a",
+                  border: "none",
+                  padding: "14px",
+                  borderRadius: "8px",
+                  fontSize: "12.5px",
+                  fontWeight: "800",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 18px rgba(0, 0, 0, 0.3)",
+                  transition: "all 0.15s ease",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(255, 255, 255, 0.2)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 18px rgba(0, 0, 0, 0.3)";
+                }}
+              >
+                GENERATE & DOWNLOAD
+              </button>
+            </div>
+          </div>
         </div>
-        <div>
-          Official Digital Records System © {new Date().getFullYear()}
+
+        {/* Studio Card Footer (Exact Match to Option 3 Mockup) */}
+        <div
+          style={{
+            borderTop: "1px solid rgba(255, 255, 255, 0.08)",
+            paddingTop: "18px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: "11px",
+            color: "#64748b",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
+          <div>
+            © {new Date().getFullYear()} Western Oregon University | Student Services
+          </div>
+          <div style={{ display: "flex", gap: "16px" }}>
+            <span style={{ cursor: "pointer" }}>Official Verification</span>
+            <span>·</span>
+            <span style={{ cursor: "pointer" }}>System Status: 🟢 Online</span>
+            <span>·</span>
+            <span style={{ cursor: "pointer" }}>Registrar Support</span>
+          </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }
