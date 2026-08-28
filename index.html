@@ -20,6 +20,17 @@
 
   <!-- Critical Synchronous CSS to prevent ANY Flash of Unstyled Content (FOUC) or color jumps -->
   <style>
+    /* 1. Universal Reset */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0 solid transparent;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
     :root {
       color-scheme: dark light;
       --bg-studio: #080c14;
