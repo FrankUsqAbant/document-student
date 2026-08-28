@@ -16,7 +16,7 @@ export const InstitutionHeader: React.FC<InstitutionHeaderProps> = ({
 }) => (
   <div style={S.header}>
     <div style={S.logoBox}>
-      <Logo src={institution.logo} />
+      <Logo src={institution.logo} institution={institution} />
     </div>
     <div style={S.instBlock}>
       <p style={S.instName}>{institution.name}</p>

@@ -4,6 +4,7 @@ import { CodeService } from "../services/codeService";
 import { InstitutionHeader } from "../components/common/InstitutionHeader";
 import { DocumentFooter } from "../components/common/DocumentFooter";
 import { SignatureSection } from "../components/common/SignatureSection";
+import { Logo } from "../components/common/Logo";
 import { FieldRow } from "../components/common/FieldRow";
 import { t } from "../i18n/translations";
 import type { Lang } from "../i18n/translations";
@@ -86,8 +87,8 @@ export const StudentCard: React.FC<StudentCardProps> = ({
           {/* Card Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(212, 175, 55, 0.3)", paddingBottom: "8px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#fff", padding: "2px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <img src={institution.logo || "./assets/wou-logo.webp"} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Logo institution={institution} size={28} />
               </div>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: "10.5px", fontWeight: "900", letterSpacing: "0.04em", color: "#f8fafc", fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "230px" }}>
