@@ -110,7 +110,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
                 t(lang, "code"),
                 t(lang, "concept"),
                 t(lang, "credits"),
-                t(lang, "amount"),
+                `${lang === "en" ? "Amount" : "Monto"} (${institution.currencySymbol || "$"})`,
               ].map((h) => (
                 <th key={h as string} style={S.th}>
                   {h as string}
