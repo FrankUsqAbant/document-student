@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { S } from "../../styles/theme";
 
 interface FormFieldProps {
@@ -15,7 +15,7 @@ interface FormFieldProps {
   placeholder?: string;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
+export const FormField: React.FC<FormFieldProps> = memo(({
   label,
   name,
   value,
@@ -32,24 +32,24 @@ export const FormField: React.FC<FormFieldProps> = ({
   };
 
   return (
-    <div className="fade-in" style={{ marginBottom: "20px" }}>
+    <div style={{ marginBottom: "14px" }}>
       <label style={S.ui.label}>{label}</label>
       {type === "textarea" ? (
         <textarea
           name={name}
-          value={value}
+          value={value ?? ""}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           style={
-            { ...inputStyle, minHeight: "120px", resize: "vertical" } as any
+            { ...inputStyle, minHeight: "100px", resize: "vertical" } as any
           }
         />
       ) : type === "select" ? (
         <select
           name={name}
-          value={value}
+          value={value ?? ""}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -65,7 +65,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         <input
           type={type}
           name={name}
-          value={value}
+          value={value ?? ""}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -75,4 +75,6 @@ export const FormField: React.FC<FormFieldProps> = ({
       )}
     </div>
   );
-};
+});
+
+FormField.displayName = "FormField";

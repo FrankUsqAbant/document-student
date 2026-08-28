@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 import { INSTITUTION, DOC_TYPES } from "./data/constants";
 import { SAMPLE } from "./data/sampleData";
@@ -80,53 +80,61 @@ export default function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleDataChange = (newData: any) => {
-    setDocData({ ...docData, [active]: newData });
-  };
+  const handleDataChange = useCallback((newData: any) => {
+    setDocData((prev) => ({ ...prev, [active]: newData }));
+  }, [active]);
 
-  const handleInstChange = (newInst: any) => {
+  const handleInstChange = useCallback((newInst: any) => {
     setInstState(newInst);
-  };
+  }, []);
 
   // Load a quick preset profile
-  const handleLoadPreset = (presetId: string) => {
+  const handleLoadPreset = useCallback((presetId: string) => {
     const preset = PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
 
-    // Update current active doc and related data
-    const currentData = docData[active as keyof typeof SAMPLE] as any;
-    const updated = {
-      ...currentData,
-      studentName: preset.name,
-      studentId: preset.studentId,
-      nationalId: preset.nationalId,
-      program: preset.program,
-      level: preset.level,
-      email: preset.email,
-      photo: preset.photo,
-    };
-    handleDataChange(updated);
-  };
+    setDocData((prev) => {
+      const currentData = prev[active as keyof typeof SAMPLE] as any;
+      return {
+        ...prev,
+        [active]: {
+          ...currentData,
+          studentName: preset.name,
+          studentId: preset.studentId,
+          nationalId: preset.nationalId,
+          program: preset.program,
+          level: preset.level,
+          email: preset.email,
+          photo: preset.photo,
+        },
+      };
+    });
+  }, [active]);
 
   // Custom photo upload handler
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (uploadEvent) => {
       const base64Photo = uploadEvent.target?.result as string;
-      const currentData = docData[active as keyof typeof SAMPLE] as any;
-      handleDataChange({
-        ...currentData,
-        photo: base64Photo,
+      setDocData((prev) => {
+        const currentData = prev[active as keyof typeof SAMPLE] as any;
+        return {
+          ...prev,
+          [active]: {
+            ...currentData,
+            photo: base64Photo,
+          },
+        };
       });
     };
     reader.readAsDataURL(file);
-  };
+  }, [active]);
 
   // Print filename builder
-  const getPrintTitle = () => {
+  const getPrintTitle = useCallback(() => {
     const studentId =
       (docData[active as keyof typeof SAMPLE] as any)?.studentId || "987654373";
     const now = new Date();
@@ -142,9 +150,9 @@ export default function App() {
     };
     const docName = docNames[active] || "Document";
     return `WOU_${docName}_${studentId}_${dateStr}`;
-  };
+  }, [active, docData]);
 
-  const handlePrint = () => {
+  const handlePrint = useCallback(() => {
     const preview = document.getElementById("doc-preview");
     const printRoot = document.getElementById("print-root");
     if (!preview || !printRoot) return;
@@ -158,9 +166,9 @@ export default function App() {
       window.print();
       document.title = originalTitle;
     }, 100);
-  };
+  }, [getPrintTitle]);
 
-  const renderDocument = () => {
+  const renderedDocument = useMemo(() => {
     const data = docData[active as keyof typeof SAMPLE];
     switch (active) {
       case "studentCard":
@@ -180,7 +188,7 @@ export default function App() {
       default:
         return null;
     }
-  };
+  }, [active, docData, instState, lang]);
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-studio)" }}>
@@ -557,7 +565,7 @@ export default function App() {
                 }}
               >
                 <div id="doc-preview">
-                  {renderDocument()}
+                  {renderedDocument}
                 </div>
               </div>
             </div>
