@@ -16,7 +16,8 @@
 }
 
 /* 2. Root Design Tokens */
-:root {
+:root, html, body {
+  color-scheme: only light !important;
   --bg-studio: #070a12;
   --panel-bg: #0d121c;
   --panel-border: #1e2638;
