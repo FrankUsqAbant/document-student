@@ -285,7 +285,7 @@ export default function App() {
               }}
             >
               {PRESETS.map((p) => (
-                <option key={p.id} value={p.id}>
+                <option key={p.id} value={p.id} style={{ background: "#0d131f", color: "#f8fafc" }}>
                   {p.name} ({p.program.split("&")[0].trim()})
                 </option>
               ))}

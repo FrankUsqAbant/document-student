@@ -56,7 +56,7 @@ export const FormField: React.FC<FormFieldProps> = memo(({
           style={inputStyle as any}
         >
           {options?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <option key={opt.value} value={opt.value} style={{ background: "#0a0f1c", color: "#f8fafc" }}>
               {opt.label}
             </option>
           ))}
