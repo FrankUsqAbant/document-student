@@ -226,6 +226,7 @@ export const ClassSchedule: React.FC<ClassScheduleProps> = ({
           },
         ]}
         seal={institution.name?.toUpperCase() || "SCHEDULE"}
+        institution={institution}
         lang={lang}
       />
       <DocumentFooter docCode={docCode} lang={lang} />

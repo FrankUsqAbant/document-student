@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // Data & Constants
-import { INSTITUTION, DOC_TYPES } from "./data/constants";
+import { INSTITUTION, UNIVERSITIES, DOC_TYPES } from "./data/constants";
 import { SAMPLE } from "./data/sampleData";
 import type { Lang } from "./i18n/translations";
 
@@ -367,13 +367,67 @@ export default function App() {
                   fontSize: "12px",
                   fontWeight: "700",
                   letterSpacing: "0.1em",
-                  color: "#94a3b8",
+                  color: "#d4af37",
                   textTransform: "uppercase",
                   marginTop: "6px",
                   fontFamily: "'JetBrains Mono', monospace",
                 }}
               >
-                WOU STUDENT PORTAL
+                {instState.systemName.toUpperCase()} · {instState.country.toUpperCase()}
+              </div>
+            </div>
+
+            {/* Country & University Model Selector */}
+            <div style={{ background: "rgba(255, 255, 255, 0.02)", border: "1px solid rgba(255, 255, 255, 0.06)", borderRadius: "10px", padding: "14px" }}>
+              <label
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontSize: "11px",
+                  fontWeight: "700",
+                  color: "#cbd5e1",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  marginBottom: "10px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                <span>{lang === "en" ? "Country & University Model" : "País y Modelo Universitario"}</span>
+                <span style={{ color: "#d4af37", fontSize: "10px", fontWeight: "800" }}>{instState.country}</span>
+              </label>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {UNIVERSITIES.map((univ) => {
+                  const isUnivActive = instState.id === univ.id;
+                  return (
+                    <button
+                      key={univ.id}
+                      onClick={() => setInstState(univ)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        background: isUnivActive ? "rgba(212, 175, 55, 0.15)" : "rgba(255, 255, 255, 0.04)",
+                        border: isUnivActive ? "1.5px solid #d4af37" : "1px solid rgba(255, 255, 255, 0.08)",
+                        color: isUnivActive ? "#ffffff" : "#94a3b8",
+                        textAlign: "left",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "2px",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: "700" }}>
+                        <span>{univ.countryFlag}</span>
+                        <span>{univ.country}</span>
+                      </div>
+                      <div style={{ fontSize: "9.5px", color: isUnivActive ? "#f3e5ab" : "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", width: "100%" }}>
+                        {univ.name}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

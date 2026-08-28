@@ -1,5 +1,3 @@
-import type { Lang } from "../i18n/translations";
-
 export const CodeService = {
   generate: (prefix: string) => {
     // Generate realistic university document codes
@@ -13,17 +11,18 @@ export const CodeService = {
     );
     return `${prefix}-${yy}${mm}-${seq}`;
   },
-  currency: (n: number, lang: Lang = "es") => {
-    if (lang === "en") {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(n);
+  currency: (n: number, countryOrCode: string = "USD", symbol?: string) => {
+    const code = countryOrCode?.toLowerCase() || "";
+    if (code === "pen" || code === "pe" || symbol === "S/.") {
+      return `S/. ${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return new Intl.NumberFormat("es-CR", {
-      style: "currency",
-      currency: "CRC",
-    }).format(n);
+    if (code === "inr" || code === "in" || symbol === "₹") {
+      return `₹ ${(n * 12).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+    }
+    if (code === "cad" || code === "ca") {
+      return `CAD $${n.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   },
   date: (val: string, lang: "en" | "es" = "en") => {
     if (!val) return "";

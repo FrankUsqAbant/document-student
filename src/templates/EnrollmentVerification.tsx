@@ -178,6 +178,7 @@ export const EnrollmentVerification: React.FC<EnrollmentVerificationProps> = ({
           },
         ]}
         seal={institution.name?.toUpperCase() || "OFFICIAL"}
+        institution={institution}
         lang={lang}
       />
 

@@ -37,14 +37,14 @@ export const StudentCard: React.FC<StudentCardProps> = ({
       </div>
 
       <div style={S.metaRow}>
-        <span>
+        <span style={{ whiteSpace: "nowrap" }}>
           {t(lang, "docNumber")}: <strong>{docCode}</strong>
         </span>
-        <span>
+        <span style={{ whiteSpace: "nowrap" }}>
           {t(lang, "issueDate")}:{" "}
           <strong>{CodeService.date(data.issueDate, lang)}</strong>
         </span>
-        <span>
+        <span style={{ whiteSpace: "nowrap" }}>
           {t(lang, "expiryDate")}:{" "}
           <strong style={{ color: "#991b1b" }}>
             {CodeService.date(data.expiryDate, lang)}
@@ -75,35 +75,31 @@ export const StudentCard: React.FC<StudentCardProps> = ({
           flexDirection: "column",
           justifyContent: "space-between"
         }}>
-          {/* Subtle Holographic / Security Sheen Overlay */}
+          {/* Subtle Security Guilloche Background */}
           <div style={{
             position: "absolute",
-            top: "-50%",
-            right: "-20%",
-            width: "300px",
-            height: "300px",
-            background: "radial-gradient(circle, rgba(212, 175, 55, 0.14) 0%, rgba(56, 189, 248, 0.08) 45%, transparent 70%)",
-            transform: "rotate(25deg)",
+            inset: 0,
+            backgroundImage: "radial-gradient(circle at 85% 20%, rgba(212, 175, 55, 0.12) 0%, transparent 60%)",
             pointerEvents: "none"
           }} />
 
           {/* Card Header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(212, 175, 55, 0.3)", paddingBottom: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(212, 175, 55, 0.3)", paddingBottom: "8px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#fff", padding: "2px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <img src={institution.logo || "./assets/wou-logo.webp"} alt="WOU Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#fff", padding: "2px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <img src={institution.logo || "./assets/wou-logo.webp"} alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
               </div>
-              <div>
-                <div style={{ fontSize: "11px", fontWeight: "900", letterSpacing: "0.08em", color: "#f8fafc", fontFamily: "'Inter', sans-serif" }}>
-                  WESTERN OREGON UNIVERSITY
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: "10.5px", fontWeight: "900", letterSpacing: "0.04em", color: "#f8fafc", fontFamily: "'Inter', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "230px" }}>
+                  {institution.name.toUpperCase()}
                 </div>
-                <div style={{ fontSize: "7.5px", color: "#d4af37", fontWeight: "700", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                <div style={{ fontSize: "7px", color: "#d4af37", fontWeight: "700", letterSpacing: "0.08em", textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "230px" }}>
                   {institution.faculty || "OFFICIAL STUDENT CREDENTIAL"}
                 </div>
               </div>
             </div>
-            <span style={{ fontSize: "8px", fontWeight: "800", background: "rgba(212, 175, 55, 0.2)", color: "#f3e5ab", border: "1px solid rgba(212, 175, 55, 0.4)", padding: "2px 6px", borderRadius: "4px", letterSpacing: "0.05em" }}>
-              ACTIVE
+            <span style={{ fontSize: "8px", fontWeight: "800", background: "rgba(212, 175, 55, 0.2)", color: "#f3e5ab", border: "1px solid rgba(212, 175, 55, 0.4)", padding: "2px 6px", borderRadius: "4px", letterSpacing: "0.05em", flexShrink: 0 }}>
+              {institution.countryCode === "pe" ? "SUNEDU VIGENTE" : "ACTIVE"}
             </span>
           </div>
 
@@ -166,7 +162,8 @@ export const StudentCard: React.FC<StudentCardProps> = ({
               </div>
 
               <div style={{ fontSize: "9px", color: "#94a3b8", marginTop: "2px", fontFamily: "'JetBrains Mono', monospace" }}>
-                ID: <span style={{ color: "#d4af37", fontWeight: "700" }}>{data.studentId}</span>
+                {institution.countryCode === "pe" ? "CÓDIGO / DNI" : institution.countryCode === "in" ? "ROLL NO" : "STUDENT ID"}:{" "}
+                <span style={{ color: "#d4af37", fontWeight: "700" }}>{data.studentId}</span>
               </div>
 
               <div style={{ fontSize: "8.5px", color: "#cbd5e1", marginTop: "3px" }}>
@@ -216,8 +213,8 @@ export const StudentCard: React.FC<StudentCardProps> = ({
       <div style={S.infoBox}>
         <strong>{lang === "en" ? "Legal Verification Notice" : "Aviso Legal de Verificación"}:</strong>{" "}
         {lang === "en"
-          ? "This document and the associated credential serve as official verification of active enrollment at Western Oregon University. Any alteration or unauthorized reproduction voids this certificate."
-          : "Este documento y la credencial asociada certifican la matrícula activa en Western Oregon University. Cualquier alteración o reproducción no autorizada anula este certificado."}
+          ? `This document and the associated credential serve as official verification of active enrollment at ${institution.name}. Any alteration or unauthorized reproduction voids this certificate.`
+          : `Este documento y la credencial asociada certifican la matrícula activa en ${institution.name}. Cualquier alteración o reproducción no autorizada anula este certificado.`}
       </div>
 
       {/* Signature & Official Seal Section */}
@@ -229,10 +226,11 @@ export const StudentCard: React.FC<StudentCardProps> = ({
           },
           {
             name: institution.registrar,
-            title: t(lang, "registrarOffice") as string,
+            title: institution.countryCode === "pe" ? "Secretaría General" : (t(lang, "registrarOffice") as string),
           },
         ]}
         seal={institution.name?.toUpperCase() || "WESTERN OREGON UNIVERSITY"}
+        institution={institution}
         lang={lang}
       />
 

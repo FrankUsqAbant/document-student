@@ -149,6 +149,7 @@ export const OfficialLetter: React.FC<OfficialLetterProps> = ({
           },
         ]}
         seal={institution.name?.toUpperCase() || "OFFICIAL"}
+        institution={institution}
         lang={lang}
       />
       <DocumentFooter docCode={docCode} lang={lang} />

@@ -6,16 +6,20 @@ interface SignatureSectionProps {
   signers: any[];
   seal: string;
   lang: Lang;
+  sealColor?: string;
+  institution?: any;
 }
 
 export const SignatureSection: React.FC<SignatureSectionProps> = ({
   signers,
   seal,
   lang,
+  sealColor = "#1e3a8a",
+  institution,
 }) => {
   const primarySigner = signers[signers.length - 1] || {
-    name: "Dr. Carmen Rodríguez Vargas",
-    title: "Academic Registrar",
+    name: institution?.registrar || "Dr. Carmen Rodríguez Vargas",
+    title: institution?.countryCode === "pe" ? "Secretaría General" : "Academic Registrar",
   };
 
   const currentDate = new Date().toLocaleDateString(lang === "en" ? "en-US" : "es-ES", {
@@ -23,6 +27,8 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({
     month: "short",
     year: "numeric",
   }).toUpperCase();
+
+  const activeSealColor = institution?.sealColor || sealColor;
 
   return (
     <div
@@ -40,16 +46,15 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({
       {/* Official Registrar Ink Stamp (Swiss Boxed Stamp matching Option 3) */}
       <div
         style={{
-          border: "2px solid #1e3a8a",
+          border: `2px solid ${activeSealColor}`,
           padding: "6px 14px",
           transform: "rotate(-3deg)",
-          color: "#1e3a8a",
+          color: activeSealColor,
           fontFamily: "'JetBrains Mono', monospace",
           textAlign: "center",
-          mixBlendMode: "multiply",
-          opacity: 0.9,
+          opacity: 0.95,
           borderRadius: "2px",
-          boxShadow: "inset 0 0 0 1px rgba(30, 58, 138, 0.4)",
+          boxShadow: `inset 0 0 0 1px ${activeSealColor}40`,
           userSelect: "none",
         }}
       >
@@ -59,15 +64,15 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({
             fontWeight: "800",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            borderBottom: "1px solid #1e3a8a",
+            borderBottom: `1px solid ${activeSealColor}`,
             paddingBottom: "3px",
             marginBottom: "3px",
           }}
         >
-          {seal.slice(0, 24) || "WESTERN OREGON UNIVERSITY"}
+          {institution?.name?.toUpperCase()?.slice(0, 30) || seal.slice(0, 24) || "OFFICIAL INSTITUTION"}
         </div>
         <div style={{ fontSize: "7px", fontWeight: "700", letterSpacing: "0.08em" }}>
-          REGISTRAR'S OFFICE
+          {institution?.countryCode === "pe" ? "SECRETARÍA GENERAL" : institution?.countryCode === "in" ? "EXAMINATION BRANCH" : "REGISTRAR'S OFFICE"}
         </div>
         <div style={{ fontSize: "8.5px", fontWeight: "900", letterSpacing: "0.06em", margin: "2px 0" }}>
           {currentDate}
@@ -77,12 +82,12 @@ export const SignatureSection: React.FC<SignatureSectionProps> = ({
             fontSize: "6.5px",
             fontWeight: "800",
             letterSpacing: "0.14em",
-            borderTop: "1px solid #1e3a8a",
+            borderTop: `1px solid ${activeSealColor}`,
             paddingTop: "3px",
             marginTop: "3px",
           }}
         >
-          OFFICIAL VERIFICATION
+          {institution?.countryCode === "pe" ? "VERIFICADO SUNEDU" : "OFFICIAL VERIFICATION"}
         </div>
       </div>
 

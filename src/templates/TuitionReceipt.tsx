@@ -117,7 +117,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
                 <td style={i % 2 ? S.tdAlt : S.td}>{item.concept}</td>
                 <td style={i % 2 ? S.tdAlt : S.td}>{item.credits || "—"}</td>
                 <td style={{ ...(i % 2 ? S.tdAlt : S.td), textAlign: "right" }}>
-                  {CodeService.currency(item.amount, lang)}
+                  {CodeService.currency(item.amount, institution.countryCode, institution.currencySymbol)}
                 </td>
               </tr>
             ))}
@@ -137,7 +137,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
                   fontSize: "15px",
                 }}
               >
-                <strong>{CodeService.currency(total, lang)}</strong>
+                <strong>{CodeService.currency(total, institution.countryCode, institution.currencySymbol)}</strong>
               </td>
             </tr>
           </tbody>
@@ -158,7 +158,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
       <SignatureSection
         signers={[
           {
-            name: institution.treasurer,
+            name: institution.treasurer || "Lic. Marco Solís Pérez",
             title: t(lang, "treasurerOffice") as string,
           },
           {
@@ -167,6 +167,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
           },
         ]}
         seal={institution.name?.toUpperCase() || "PAYMENT"}
+        institution={institution}
         lang={lang}
       />
       <DocumentFooter docCode={docCode} lang={lang} />

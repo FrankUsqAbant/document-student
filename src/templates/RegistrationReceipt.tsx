@@ -151,6 +151,7 @@ export const RegistrationReceipt: React.FC<RegistrationReceiptProps> = ({
           },
         ]}
         seal={institution.name?.toUpperCase() || "REGISTRAR"}
+        institution={institution}
         lang={lang}
       />
       <DocumentFooter docCode={docCode} lang={lang} />

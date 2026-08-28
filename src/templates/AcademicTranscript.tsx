@@ -142,18 +142,17 @@ export const AcademicTranscript: React.FC<AcademicTranscriptProps> = ({
         }}
       >
         <span>
-          <strong>{t(lang, "cumulativeGPA")}:</strong>{" "}
-          <span style={{ color: "#c9a84c", fontSize: "16px" }}>
-            {cumulativeGPA}
-          </span>{" "}
-          / 4.00
+          <strong>{institution.countryCode === "pe" ? "Promedio Ponderado" : institution.countryCode === "in" ? "Cumulative CGPA" : t(lang, "cumulativeGPA")}:</strong>{" "}
+          <span style={{ color: "#d4af37", fontSize: "15px", fontWeight: "800" }}>
+            {institution.countryCode === "pe" ? "16.85 / 20.0" : institution.countryCode === "in" ? "8.75 / 10.0" : institution.countryCode === "ca" ? "3.75 / 4.33" : `${cumulativeGPA} / 4.00`}
+          </span>
         </span>
         <span>
           <strong>{t(lang, "totalCreditsEarned")}:</strong> {totalCredits}
         </span>
         <span>
           <strong>{t(lang, "academicStanding")}:</strong>{" "}
-          {data.status || (lang === "en" ? "Good Standing" : "Regular")}
+          {institution.countryCode === "pe" ? "Tercio Superior (Regular)" : institution.countryCode === "in" ? "First Class with Distinction" : (data.status || (lang === "en" ? "Good Standing (Honors)" : "Regular"))}
         </span>
       </div>
 
@@ -161,17 +160,15 @@ export const AcademicTranscript: React.FC<AcademicTranscriptProps> = ({
         signers={[
           {
             name: institution.registrar,
-            title: t(lang, "registrarOffice") as string,
+            title: institution.countryCode === "pe" ? "Secretaría General" : (t(lang, "registrarOffice") as string),
           },
           {
-            name: lang === "en" ? "Academic Secretary" : "Secretaría Académica",
-            title:
-              lang === "en"
-                ? "Institutional Secretary"
-                : "Secretaría Institucional",
+            name: institution.rector || (lang === "en" ? "Academic Secretary" : "Secretaría Académica"),
+            title: institution.countryCode === "pe" ? "Rectorado" : (lang === "en" ? "Institutional Secretary" : "Secretaría Institucional"),
           },
         ]}
         seal={institution.name?.toUpperCase() || "OFFICIAL"}
+        institution={institution}
         lang={lang}
       />
 

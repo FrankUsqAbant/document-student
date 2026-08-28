@@ -98,7 +98,9 @@ export const S: Record<string, any> = {
   metaRow: {
     display: "flex",
     justifyContent: "space-between",
-    fontSize: "11px",
+    flexWrap: "wrap",
+    gap: "8px 16px",
+    fontSize: "10.5px",
     color: "#475569",
     marginBottom: "20px",
     fontFamily: "'JetBrains Mono', monospace",
