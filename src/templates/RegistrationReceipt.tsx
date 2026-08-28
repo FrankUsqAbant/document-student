@@ -29,7 +29,15 @@ export const RegistrationReceipt: React.FC<RegistrationReceiptProps> = ({
       <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmRegistration")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
-      <div style={S.docTitle}>{t(lang, "registrationTitle")}</div>
+      <div style={S.docTitle}>
+        {institution.countryCode === "pe"
+          ? "COMPROBANTE DE INSCRIPCIÓN Y REGISTRO ACADÉMICO"
+          : institution.countryCode === "ca"
+          ? "COURSE REGISTRATION CONFIRMATION RECEIPT"
+          : institution.countryCode === "in"
+          ? "STUDENT REGISTRATION CUM ADMISSION RECEIPT"
+          : t(lang, "registrationTitle")}
+      </div>
       <div style={S.metaRow}>
         <span>
           {t(lang, "docNumber")}: <strong>{docCode}</strong>

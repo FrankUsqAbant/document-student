@@ -32,9 +32,13 @@ export const StudentCard: React.FC<StudentCardProps> = ({
       <InstitutionHeader institution={institution} lang={lang} />
       
       <div style={S.docTitle}>
-        {lang === "en" 
-          ? "Official Student Identification & Credentials Verification" 
-          : "Identificación Estudiantil Oficial y Verificación de Credenciales"}
+        {institution.countryCode === "pe"
+          ? "CARNÉ UNIVERSITARIO OFICIAL · ACREDITACIÓN SUNEDU"
+          : institution.countryCode === "ca"
+          ? "OFFICIAL STUDENT IDENTIFICATION & CAMPUS CREDENTIAL"
+          : institution.countryCode === "in"
+          ? "OFFICIAL STUDENT IDENTITY CARD & BONAFIDE RECORD"
+          : (lang === "en" ? "OFFICIAL STUDENT IDENTIFICATION & CREDENTIALS VERIFICATION" : "VERIFICACIÓN OFICIAL DE CREDENCIALES")}
       </div>
 
       <div style={S.metaRow}>
@@ -213,9 +217,15 @@ export const StudentCard: React.FC<StudentCardProps> = ({
 
       <div style={S.infoBox}>
         <strong>{lang === "en" ? "Legal Verification Notice" : "Aviso Legal de Verificación"}:</strong>{" "}
-        {lang === "en"
-          ? `This document and the associated credential serve as official verification of active enrollment at ${institution.name}. Any alteration or unauthorized reproduction voids this certificate.`
-          : `Este documento y la credencial asociada certifican la matrícula activa en ${institution.name}. Cualquier alteración o reproducción no autorizada anula este certificado.`}
+        {institution.countryCode === "pe"
+          ? `Conforme al Artículo 99° de la Ley Universitaria N° 30220, el presente Carné Universitario acredita la condición de estudiante regular de la ${institution.name} con licenciamiento SUNEDU vigente. Acredita el derecho a pasaje universitario en el transporte público.`
+          : institution.countryCode === "ca"
+          ? `Issued under the authority of the Simon Fraser University Act (British Columbia). Validates active student status for BC Transit U-Pass, campus security, and examination identification.`
+          : institution.countryCode === "in"
+          ? `Issued under the BITS Pilani Charter and UGC regulations. Serves as authentic bonafide identification for academic terms, library access, laboratory permissions, and Indian Railways concession.`
+          : (lang === "en"
+            ? `This document and the associated credential serve as official verification of active enrollment at ${institution.name}. Any alteration or unauthorized reproduction voids this certificate.`
+            : `Este documento y la credencial asociada certifican la matrícula activa en ${institution.name}. Cualquier alteración o reproducción no autorizada anula este certificado.`)}
       </div>
 
       {/* Signature & Official Seal Section */}

@@ -28,9 +28,13 @@ export const EnrollmentVerification: React.FC<EnrollmentVerificationProps> = ({
       </div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>
-        {lang === "en"
-          ? "ENROLLMENT VERIFICATION"
-          : "COMPROBANTE DE INSCRIPCIÓN"}
+        {institution.countryCode === "pe"
+          ? "CONSTANCIA OFICIAL DE MATRÍCULA (VIGENCIA SUNEDU)"
+          : institution.countryCode === "ca"
+          ? "OFFICIAL CONFIRMATION OF ENROLMENT (IRCC COMPLIANT)"
+          : institution.countryCode === "in"
+          ? "BONAFIDE STUDENT CERTIFICATE & ENROLMENT STATUS"
+          : (lang === "en" ? "OFFICIAL ENROLLMENT VERIFICATION" : "CONSTANCIA DE MATRÍCULA")}
       </div>
       <div style={S.metaRow}>
         <span>
@@ -52,29 +56,21 @@ export const EnrollmentVerification: React.FC<EnrollmentVerificationProps> = ({
         }}
       >
         <p style={{ textIndent: "40px", margin: "0 0 12px 0" }}>
-          {lang === "en" ? (
+          {institution.countryCode === "pe" ? (
             <>
-              The Office of the Registrar of <strong>{institution.name}</strong>{" "}
-              hereby certifies that <strong>{data.studentName}</strong>, bearing
-              Student ID <strong>{data.studentId}</strong>, is officially
-              enrolled as a{" "}
-              <strong>{data.enrollmentStatus || "full-time"}</strong> student
-              for the <strong>{data.semester}</strong> academic period.
+              La Secretaría General y la Dirección de Registro Académico de la <strong>{institution.name}</strong>, institución universitaria licenciada por la <strong>Superintendencia Nacional de Educación Superior Universitaria (SUNEDU)</strong> mediante Resolución N° 126-2018-SUNEDU/CD, hace constar que el(la) estudiante <strong>{data.studentName}</strong>, identificado(a) con DNI/Código <strong>{data.studentId}</strong>, se encuentra debidamente matriculado(a) y con matrícula vigente para el período académico <strong>{data.semester}</strong>.
+            </>
+          ) : institution.countryCode === "ca" ? (
+            <>
+              The Office of the Registrar at <strong>{institution.name}</strong>, a Designated Learning Institution recognized under British Columbia legislation and Immigration, Refugees and Citizenship Canada (IRCC DLI #O19279164102), hereby certifies that <strong>{data.studentName}</strong>, Student ID <strong>{data.studentId}</strong>, is enrolled in active standing for the <strong>{data.semester}</strong> academic term.
+            </>
+          ) : institution.countryCode === "in" ? (
+            <>
+              The Academic Regulations and Records Division of <strong>{institution.name}</strong>, declared as an Institution of Eminence under Section 3 of the UGC Act, 1956, hereby certifies that <strong>{data.studentName}</strong>, Roll No. / BITS ID <strong>{data.studentId}</strong>, is a bonafide student enrolled for the <strong>{data.semester}</strong> academic session.
             </>
           ) : (
             <>
-              La Oficina de Registro de <strong>{institution.name}</strong>{" "}
-              certifica que <strong>{data.studentName}</strong>, con Carné
-              Estudiantil <strong>{data.studentId}</strong>, se encuentra
-              debidamente inscrito(a) como estudiante{" "}
-              <strong>
-                {data.enrollmentStatus === "full-time"
-                  ? "a tiempo completo"
-                  : data.enrollmentStatus === "part-time"
-                    ? "a medio tiempo"
-                    : "a tiempo completo"}
-              </strong>{" "}
-              para el período académico <strong>{data.semester}</strong>.
+              The Office of the Registrar of <strong>{institution.name}</strong>, accredited by the Northwest Commission on Colleges and Universities (NWCCU), hereby certifies that <strong>{data.studentName}</strong>, bearing Student ID <strong>{data.studentId}</strong>, is officially enrolled as a <strong>{data.enrollmentStatus || "full-time"}</strong> student for the <strong>{data.semester}</strong> academic period.
             </>
           )}
         </p>

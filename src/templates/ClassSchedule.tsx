@@ -35,7 +35,15 @@ export const ClassSchedule: React.FC<ClassScheduleProps> = ({
       <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmSchedule")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
-      <div style={S.docTitle}>{t(lang, "scheduleTitle")}</div>
+      <div style={S.docTitle}>
+        {institution.countryCode === "pe"
+          ? "HORARIO Y DISTRIBUCIÓN ACADÉMICA SEMESTRAL"
+          : institution.countryCode === "ca"
+          ? "STUDENT COURSE & CLASS SCHEDULE"
+          : institution.countryCode === "in"
+          ? "SEMESTER TIME TABLE & COURSE ALLOCATION"
+          : t(lang, "scheduleTitle")}
+      </div>
       <div style={S.metaRow}>
         <span>
           {t(lang, "docNumber")}: <strong>{docCode}</strong>

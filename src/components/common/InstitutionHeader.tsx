@@ -37,14 +37,15 @@ export const InstitutionHeader: React.FC<InstitutionHeaderProps> = ({
         alignItems: "flex-end",
       }}
     >
-      <div style={{ fontWeight: "700", fontSize: "11px", color: "#1a1a2e" }}>
-        {t(lang, "accreditedBy")}
+      <div style={{ fontWeight: "800", fontSize: "10px", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "right" }}>
+        {institution.accreditation || t(lang, "accreditedBy")}
       </div>
-      <div>
-        {t(lang, "institutionalCode")}: {institution.code}
+      <div style={{ fontSize: "9.5px", color: "#475569" }}>
+        {institution.countryCode === "pe" ? "Código Institucional SUNEDU" : institution.countryCode === "in" ? "UGC Institutional Code" : institution.countryCode === "ca" ? "Designated Learning Inst. (DLI)" : (t(lang, "institutionalCode") as string)}:{" "}
+        <strong style={{ color: "#0f172a" }}>{institution.code}</strong>
       </div>
-      <div>
-        {t(lang, "issueDateLabel")}: {CodeService.now(lang)}
+      <div style={{ fontSize: "9.5px", color: "#64748b" }}>
+        {institution.countryCode === "pe" ? "Fecha de emisión" : (t(lang, "issueDateLabel") as string)}: {CodeService.now(lang)}
       </div>
       {/* 1D Barcode for Automated Parsing */}
       <div

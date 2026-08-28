@@ -26,7 +26,15 @@ export const OfficialLetter: React.FC<OfficialLetterProps> = ({
       <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmLetter")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
-      <div style={S.docTitle}>{t(lang, "officialLetterTitle")}</div>
+      <div style={S.docTitle}>
+        {institution.countryCode === "pe"
+          ? "CARTA OFICIAL DE RECTORADO Y SECRETARÍA GENERAL"
+          : institution.countryCode === "ca"
+          ? "OFFICIAL LETTER FROM THE OFFICE OF THE REGISTRAR"
+          : institution.countryCode === "in"
+          ? "OFFICIAL ATTESTATION & PROVOST LETTER"
+          : t(lang, "officialLetterTitle")}
+      </div>
       <div style={S.metaRow}>
         <span>
           {t(lang, "reference")}: <strong>{docCode}</strong>

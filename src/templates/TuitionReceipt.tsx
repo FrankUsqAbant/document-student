@@ -30,7 +30,15 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
       <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmPaid")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
-      <div style={S.docTitle}>{t(lang, "tuitionTitle")}</div>
+      <div style={S.docTitle}>
+        {institution.countryCode === "pe"
+          ? "ESTADO DE CUENTA Y BOLETA OFICIAL DE MATRÍCULA"
+          : institution.countryCode === "ca"
+          ? "STATEMENT OF TUITION & ENROLMENT RECEIPT"
+          : institution.countryCode === "in"
+          ? "OFFICIAL FEE RECEIPT & SEMESTER CHALLAN"
+          : t(lang, "tuitionTitle")}
+      </div>
       <div style={S.metaRow}>
         <span>
           {t(lang, "receiptNo")}: <strong>{docCode}</strong>
@@ -152,7 +160,13 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
           borderLeft: "4px solid #d97706",
         }}
       >
-        {t(lang, "tuitionNote")}
+        {institution.countryCode === "pe"
+          ? "Comprobante oficial de pago emitido por la Oficina de Tesorería de la Universidad Nacional de Trujillo. Exonerado del IGV conforme al Artículo 19° del TUO de la Ley del Impuesto a la Renta (Entidad Educativa Ley N° 30220). RUC UNT: 20172557628."
+          : institution.countryCode === "ca"
+          ? "Official receipt issued by Simon Fraser University Student Accounts. Retain this statement for Canadian T2202 Tuition and Enrolment Certificate tax purposes (CRA compliant)."
+          : institution.countryCode === "in"
+          ? "Official fee challan counterfoil issued by BITS Pilani Accounts Division. Valid for educational loan substantiation and tax exemption under Section 80E of Income Tax Act."
+          : t(lang, "tuitionNote")}
       </div>
 
       <SignatureSection

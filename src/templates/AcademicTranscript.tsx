@@ -31,7 +31,15 @@ export const AcademicTranscript: React.FC<AcademicTranscriptProps> = ({
       <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmTranscript")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
-      <div style={S.docTitle}>{t(lang, "transcriptTitle")}</div>
+      <div style={S.docTitle}>
+        {institution.countryCode === "pe"
+          ? "CERTIFICADO OFICIAL DE ESTUDIOS Y RÉCORD ACADÉMICO"
+          : institution.countryCode === "ca"
+          ? "OFFICIAL ACADEMIC TRANSCRIPT & RECORD"
+          : institution.countryCode === "in"
+          ? "CONSOLIDATED SEMESTER MARKSHEET & GRADE CARD"
+          : t(lang, "transcriptTitle")}
+      </div>
       <div style={S.metaRow}>
         <span>
           {t(lang, "docNumber")}: <strong>{docCode}</strong>
@@ -178,9 +186,15 @@ export const AcademicTranscript: React.FC<AcademicTranscriptProps> = ({
         {lang === "en"
           ? "SECURITY FEATURES INCLUDE MICROPRINTING, WATERMARK, AND BARCODE. VOID IF ALTERED. "
           : "CARACTERÍSTICAS DE SEGURIDAD INCLUYEN MICROIMPRESIÓN Y MARCA DE AGUA. NULO SI ES ALTERADO. "}
-        {lang === "en"
-          ? "FERPA RELEASE: IN ACCORDANCE WITH THE FAMILY EDUCATIONAL RIGHTS AND PRIVACY ACT OF 1974, THIS RECORD CANNOT BE RELEASED TO A THIRD PARTY WITHOUT WRITTEN CONSENT OF THE STUDENT."
-          : "LEY FERPA: ESTE REGISTRO NO PUEDE SER COMPARTIDO CON TERCEROS SIN CONSENTIMIENTO ESCRITO DEL ESTUDIANTE."}
+        {institution.countryCode === "pe"
+          ? "LEY UNIVERSITARIA N° 30220: EXPEDIDO CONFORME A LOS ARCHIVOS DE LA SECRETARÍA GENERAL. VÁLIDO PARA TRÁMITES NACIONALES E INTERNACIONALES. SUNEDU VERIFICADO."
+          : institution.countryCode === "ca"
+          ? "BRITISH COLUMBIA UNIVERSITY ACT: THIS OFFICIAL RECORD CONFORMS TO SFU SENATE REGULATIONS. ISSUED BY THE OFFICE OF THE REGISTRAR."
+          : institution.countryCode === "in"
+          ? "UGC / AICTE RECOGNIZED: CONSOLIDATED STATEMENT OF GRADES UNDER SECTION 3 OF THE UGC ACT, 1956. BITS PILANI ATTESTED."
+          : (lang === "en"
+            ? "FERPA RELEASE: IN ACCORDANCE WITH THE FAMILY EDUCATIONAL RIGHTS AND PRIVACY ACT OF 1974, THIS RECORD CANNOT BE RELEASED TO A THIRD PARTY WITHOUT WRITTEN CONSENT OF THE STUDENT."
+            : "LEY FERPA: ESTE REGISTRO NO PUEDE SER COMPARTIDO CON TERCEROS SIN CONSENTIMIENTO ESCRITO DEL ESTUDIANTE.")}
       </div>
 
       <DocumentFooter docCode={docCode} lang={lang} />
