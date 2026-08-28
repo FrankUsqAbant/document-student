@@ -32,6 +32,7 @@ export const ClassSchedule: React.FC<ClassScheduleProps> = ({
 
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmSchedule")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>{t(lang, "scheduleTitle")}</div>

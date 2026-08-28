@@ -27,6 +27,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
 
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmPaid")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>{t(lang, "tuitionTitle")}</div>

@@ -26,6 +26,7 @@ export const RegistrationReceipt: React.FC<RegistrationReceiptProps> = ({
 
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmRegistration")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>{t(lang, "registrationTitle")}</div>

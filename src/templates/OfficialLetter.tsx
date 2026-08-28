@@ -23,6 +23,7 @@ export const OfficialLetter: React.FC<OfficialLetterProps> = ({
   const docCode = CodeService.generate("CAR");
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmLetter")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>{t(lang, "officialLetterTitle")}</div>

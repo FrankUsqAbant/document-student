@@ -1,70 +1,114 @@
-/* ===== Reset & Base ===== */
+/* ===== Swiss Editorial & Minimalist Studio Pro Design System ===== */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+:root {
+  --bg-studio: #070a12;
+  --panel-bg: #0d121c;
+  --panel-border: #1e2638;
+  --gold-accent: #d4af37;
+  --gold-light: #f3e5ab;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  font-family:
-    "Inter",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #0f172a;
-  color: #f8fafc;
+  background-color: var(--bg-studio);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
+    radial-gradient(#1e293b 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px;
+  color: var(--text-main);
   min-width: 320px;
   overflow-x: hidden;
 }
 
-/* ===== Scrollbar ===== */
+/* ===== Custom Swiss Scrollbar ===== */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: #070a12;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 4px;
+  background: #1e293b;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #c9a84c;
+  background: var(--gold-accent);
 }
 
-/* ===== Inputs ===== */
+/* ===== Form Controls ===== */
 input,
 textarea,
 select {
   box-sizing: border-box;
   max-width: 100%;
+  font-family: var(--font-sans);
 }
 
-/* ===== Tabs scrollable ===== */
+/* ===== Tabs Bar ===== */
 .tabs-scroll {
   display: flex;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 .tabs-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
+}
+
+/* ===== Document Paper Sheet Styling & Realistic Desk Shadow ===== */
+.document-desk-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding: 24px 16px;
+  overflow-x: auto;
+}
+
+.document-sheet-wrapper {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top center;
+}
+
+/* ===== Responsive Layout Classes ===== */
+@media (max-width: 1024px) {
+  .studio-split-layout {
+    flex-direction: column !important;
+  }
+  .studio-editor-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .studio-preview-panel {
+    width: 100% !important;
+  }
 }
 
 /* ===== Animations ===== */
 .fade-in {
-  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -72,29 +116,22 @@ select {
   }
 }
 
-.bg-animate {
-  background: linear-gradient(-45deg, #0f172a, #1e293b, #0f172a, #16213e);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
-}
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* ===== Print ===== */
+/* ===== Print Engine Rules ===== */
 #print-root {
   display: none;
 }
 
 @media print {
+  @page {
+    size: letter portrait;
+    margin: 0;
+  }
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
   #root {
     display: none !important;
   }
@@ -103,9 +140,12 @@ select {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: auto;
-    background: #fff;
-    z-index: 99999;
+    width: 100% !important;
+    height: auto !important;
+    background: #fff !important;
+    z-index: 999999;
+  }
+  #print-root * {
+    box-shadow: none !important;
   }
 }

@@ -28,6 +28,7 @@ export const AcademicTranscript: React.FC<AcademicTranscriptProps> = ({
 
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>{t(lang, "wmTranscript")}</div>
       <InstitutionHeader institution={institution} lang={lang} />
       <div style={S.docTitle}>{t(lang, "transcriptTitle")}</div>

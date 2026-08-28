@@ -22,6 +22,7 @@ export const EnrollmentVerification: React.FC<EnrollmentVerificationProps> = ({
 
   return (
     <div style={S.page}>
+      <div style={S.securityBorder} />
       <div style={S.watermark}>
         {lang === "en" ? "CERTIFIED" : "CERTIFICADO"}
       </div>

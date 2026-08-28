@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-// Estilos y Datos
-import { S } from "./styles/theme";
 import { INSTITUTION, DOC_TYPES } from "./data/constants";
 import { SAMPLE } from "./data/sampleData";
 import { t } from "./i18n/translations";
 import type { Lang } from "./i18n/translations";
 
-// Plantillas
+// Document Templates
 import {
   StudentCard,
   ClassSchedule,
@@ -18,18 +16,66 @@ import {
   OfficialLetter,
 } from "./templates";
 
-// Componentes UI
+// Form Components
 import { DynamicForm } from "./components/forms/DynamicForm";
+
+// Preset Student Profiles for Instant Realism
+const PRESETS = [
+  {
+    id: "ethan",
+    name: "Ethan Abanto Cruzado",
+    program: "Marketing & Business Analytics",
+    studentId: "987654373",
+    nationalId: "72849105",
+    level: "Undergraduate — Junior",
+    email: "e.abantocruzado@wou.edu",
+    photo: "./assets/student_portrait.webp",
+  },
+  {
+    id: "sarah",
+    name: "Sarah J. Jenkins",
+    program: "Computer Science & AI Systems",
+    studentId: "987410294",
+    nationalId: "84920173",
+    level: "Undergraduate — Senior (Honors)",
+    email: "s.jenkins@wou.edu",
+    photo: "./assets/student_portrait.webp",
+  },
+  {
+    id: "carlos",
+    name: "Carlos A. Mendoza",
+    program: "Economics & Global Finance",
+    studentId: "987115820",
+    nationalId: "65039218",
+    level: "Undergraduate — Sophomore",
+    email: "c.mendoza@wou.edu",
+    photo: "./assets/student_portrait.webp",
+  }
+];
 
 export default function App() {
   const [active, setActive] = useState("studentCard");
   const [docData, setDocData] = useState(SAMPLE);
   const [instState, setInstState] = useState(INSTITUTION);
   const [lang, setLang] = useState<Lang>("en");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [mobileTab, setMobileTab] = useState<"preview" | "editor">("preview");
+  const [zoom, setZoom] = useState(0.85);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (window.innerWidth >= 1400) {
+        setZoom(0.88);
+      } else if (window.innerWidth >= 1100) {
+        setZoom(0.72);
+      } else {
+        setZoom(0.65);
+      }
+    };
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -42,20 +88,57 @@ export default function App() {
     setInstState(newInst);
   };
 
-  // Build a university-style filename for the PDF
+  // Load a quick preset profile
+  const handleLoadPreset = (presetId: string) => {
+    const preset = PRESETS.find((p) => p.id === presetId);
+    if (!preset) return;
+
+    // Update current active doc and related data
+    const currentData = docData[active as keyof typeof SAMPLE] as any;
+    const updated = {
+      ...currentData,
+      studentName: preset.name,
+      studentId: preset.studentId,
+      nationalId: preset.nationalId,
+      program: preset.program,
+      level: preset.level,
+      email: preset.email,
+      photo: preset.photo,
+    };
+    handleDataChange(updated);
+  };
+
+  // Custom photo upload handler
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      const base64Photo = uploadEvent.target?.result as string;
+      const currentData = docData[active as keyof typeof SAMPLE] as any;
+      handleDataChange({
+        ...currentData,
+        photo: base64Photo,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Print filename builder
   const getPrintTitle = () => {
     const studentId =
       (docData[active as keyof typeof SAMPLE] as any)?.studentId || "987654373";
     const now = new Date();
     const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
     const docNames: Record<string, string> = {
-      studentCard: "Student_ID_Card",
-      schedule: "Class_Schedule",
+      studentCard: "Official_Student_ID",
+      schedule: "Official_Class_Schedule",
       tuitionReceipt: "Tuition_Statement",
       transcript: "Academic_Transcript",
       registrationReceipt: "Registration_Receipt",
       enrollmentVerification: "Enrollment_Verification",
-      officialLetter: "Official_Letter",
+      officialLetter: "Official_Verification_Letter",
     };
     const docName = docNames[active] || "Document";
     return `WOU_${docName}_${studentId}_${dateStr}`;
@@ -66,7 +149,6 @@ export default function App() {
     const printRoot = document.getElementById("print-root");
     if (!preview || !printRoot) return;
 
-    // Set university-style document title (becomes the PDF filename)
     const originalTitle = document.title;
     document.title = getPrintTitle();
 
@@ -74,7 +156,6 @@ export default function App() {
     printRoot.style.display = "block";
     setTimeout(() => {
       window.print();
-      // Restore original title after print dialog
       document.title = originalTitle;
     }, 100);
   };
@@ -85,194 +166,169 @@ export default function App() {
       case "studentCard":
         return <StudentCard data={data} institution={instState} lang={lang} />;
       case "schedule":
-        return (
-          <ClassSchedule data={data} institution={instState} lang={lang} />
-        );
+        return <ClassSchedule data={data} institution={instState} lang={lang} />;
       case "tuitionReceipt":
-        return (
-          <TuitionReceipt data={data} institution={instState} lang={lang} />
-        );
+        return <TuitionReceipt data={data} institution={instState} lang={lang} />;
       case "transcript":
-        return (
-          <AcademicTranscript data={data} institution={instState} lang={lang} />
-        );
+        return <AcademicTranscript data={data} institution={instState} lang={lang} />;
       case "registrationReceipt":
-        return (
-          <RegistrationReceipt
-            data={data}
-            institution={instState}
-            lang={lang}
-          />
-        );
+        return <RegistrationReceipt data={data} institution={instState} lang={lang} />;
       case "enrollmentVerification":
-        return (
-          <EnrollmentVerification
-            data={data}
-            institution={instState}
-            lang={lang}
-          />
-        );
+        return <EnrollmentVerification data={data} institution={instState} lang={lang} />;
       case "officialLetter":
-        return (
-          <OfficialLetter data={data} institution={instState} lang={lang} />
-        );
+        return <OfficialLetter data={data} institution={instState} lang={lang} />;
       default:
         return null;
     }
   };
 
   return (
-    <div
-      className="bg-animate"
-      style={{ minHeight: "100vh", color: "#f8fafc", overflowX: "hidden" }}
-    >
-      {/* ===== HEADER ===== */}
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-studio)" }}>
+      {/* ===== SWISS EDITORIAL HEADER ===== */}
       <header
         style={{
-          background: "rgba(15, 23, 42, 0.8)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(201,168,76,0.3)",
-          padding: isMobile ? "16px" : "20px 48px",
+          background: "#080c14",
+          borderBottom: "1px solid #1e2638",
+          padding: "14px 28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           position: "sticky",
           top: 0,
           zIndex: 100,
+          gap: "16px",
           flexWrap: "wrap",
-          gap: isMobile ? "12px" : "20px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Logo + Title */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: isMobile ? "10px" : "16px",
-            minWidth: 0,
-            flex: 1,
-          }}
-        >
-          <div style={{ fontSize: isMobile ? "22px" : "28px", flexShrink: 0 }}>
+        {/* Brand & Status */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: 0 }}>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "8px",
+              background: "#0d131f",
+              border: "1px solid #d4af37",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "18px",
+              color: "#d4af37",
+              flexShrink: 0,
+            }}
+          >
             🏛
           </div>
           <div style={{ minWidth: 0 }}>
-            <h1
-              style={{
-                color: "#fff",
-                margin: 0,
-                fontSize: isMobile ? "15px" : "20px",
-                fontWeight: "900",
-                letterSpacing: "0.02em",
-                textTransform: "uppercase",
-                fontFamily: "'Outfit', sans-serif",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {lang === "en" ? "WOU Student Portal" : "Portal Estudiantil WOU"}
-            </h1>
-            {!isMobile && (
-              <div
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+              <h1
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "4px",
+                  margin: 0,
+                  fontSize: isMobile ? "15px" : "17px",
+                  fontWeight: "800",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#f8fafc",
+                  fontFamily: "'Inter', sans-serif",
                 }}
               >
-                <span
-                  style={{
-                    ...S.ui.docBadge,
-                    background: "rgba(201,168,76,0.2)",
-                    color: "#c9a84c",
-                    border: "1px solid rgba(201,168,76,0.4)",
-                  }}
-                >
-                  {lang === "en" ? "Official Records" : "Registros Oficiales"}
-                </span>
-                <p
-                  style={{
-                    color: "#94a3b8",
-                    margin: 0,
-                    fontSize: "12px",
-                    fontWeight: "500",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  Western Oregon University —{" "}
-                  {lang === "en"
-                    ? "Office of the Registrar"
-                    : "Oficina de Registro"}
-                </p>
-              </div>
-            )}
+                WOU Academic Document Studio
+              </h1>
+              <span
+                style={{
+                  background: "rgba(16, 185, 129, 0.12)",
+                  color: "#10b981",
+                  border: "1px solid rgba(16, 185, 129, 0.3)",
+                  padding: "2px 8px",
+                  borderRadius: "4px",
+                  fontSize: "9.5px",
+                  fontWeight: "700",
+                  letterSpacing: "0.08em",
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                ● 300 DPI ENGINE
+              </span>
+            </div>
+            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px", fontFamily: "'Inter', sans-serif" }}>
+              Western Oregon University · Office of the Registrar
+            </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: isMobile ? "8px" : "12px",
-            flexShrink: 0,
-          }}
-        >
+        {/* Global Controls & Primary Action */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          {/* Quick Preset Selector */}
+          <div style={{ display: isMobile ? "none" : "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: "'JetBrains Mono', monospace" }}>
+              Perfil:
+            </span>
+            <select
+              onChange={(e) => handleLoadPreset(e.target.value)}
+              style={{
+                background: "#0d131f",
+                color: "#f8fafc",
+                border: "1px solid #1e2638",
+                padding: "6px 10px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              {PRESETS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({p.program.split("&")[0].trim()})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Language Toggle */}
           <button
             onClick={() => setLang(lang === "en" ? "es" : "en")}
             style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-              padding: isMobile ? "8px 12px" : "10px 18px",
-              fontSize: isMobile ? "12px" : "13px",
+              background: "#0d131f",
+              color: "#d4af37",
+              border: "1px solid #1e2638",
+              padding: "8px 14px",
+              borderRadius: "6px",
+              fontSize: "12px",
               fontWeight: "700",
               cursor: "pointer",
-              borderRadius: "10px",
-              fontFamily: "'Outfit', sans-serif",
-              transition: "all 0.3s ease",
-              whiteSpace: "nowrap",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.2)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              fontFamily: "'JetBrains Mono', monospace",
+              transition: "all 0.2s ease",
             }}
           >
             {lang === "en" ? "🇺🇸 EN" : "🇪🇸 ES"}
           </button>
+
+          {/* Master Print/PDF Button */}
           <button
             onClick={handlePrint}
             style={{
-              background: "linear-gradient(135deg, #c9a84c 0%, #a68a3b 100%)",
-              color: "#1a1a2e",
+              background: "linear-gradient(135deg, #d4af37 0%, #b89628 100%)",
+              color: "#0a0f1c",
               border: "none",
-              padding: isMobile ? "8px 16px" : "12px 28px",
-              fontSize: isMobile ? "11px" : "13px",
+              padding: isMobile ? "9px 18px" : "10px 24px",
+              borderRadius: "6px",
+              fontSize: isMobile ? "12px" : "13px",
               fontWeight: "800",
-              letterSpacing: "0.05em",
+              letterSpacing: "0.04em",
               cursor: "pointer",
-              borderRadius: "10px",
-              textTransform: "uppercase",
-              fontFamily: "'Outfit', sans-serif",
-              boxShadow: "0 10px 20px rgba(201,168,76,0.2)",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 4px 14px rgba(212, 175, 55, 0.3)",
+              transition: "transform 0.15s ease, box-shadow 0.15s ease",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
-              e.currentTarget.style.boxShadow =
-                "0 15px 30px rgba(201,168,76,0.4)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(212, 175, 55, 0.45)";
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = "translateY(0) scale(1)";
-              e.currentTarget.style.boxShadow =
-                "0 10px 20px rgba(201,168,76,0.2)";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 4px 14px rgba(212, 175, 55, 0.3)";
             }}
           >
             🖨 {t(lang, "printDocument")}
@@ -280,111 +336,369 @@ export default function App() {
         </div>
       </header>
 
-      {/* ===== TABS ===== */}
+      {/* ===== SEGMENTED DOCUMENT TYPES BAR ===== */}
       <nav
         className="tabs-scroll"
         style={{
-          background: "rgba(30, 41, 59, 0.4)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-          padding: isMobile ? "0 12px" : "0 48px",
-          gap: isMobile ? "4px" : "8px",
+          background: "#0a0e17",
+          borderBottom: "1px solid #1e2638",
+          padding: "0 24px",
+          gap: "4px",
           position: "sticky",
-          top: isMobile ? "56px" : "85px",
+          top: "65px",
           zIndex: 90,
         }}
       >
-        {DOC_TYPES.map((doc) => (
-          <button
-            key={doc.key}
-            onClick={() => setActive(doc.key)}
-            style={{
-              padding: isMobile ? "12px 14px" : "16px 24px",
-              background: "transparent",
-              color: active === doc.key ? "#c9a84c" : "#64748b",
-              border: "none",
-              cursor: "pointer",
-              fontSize: isMobile ? "11px" : "13px",
-              fontWeight: active === doc.key ? "800" : "600",
-              letterSpacing: "0.02em",
-              whiteSpace: "nowrap",
-              borderBottom:
-                active === doc.key
-                  ? "3px solid #c9a84c"
-                  : "3px solid transparent",
-              transition: "all 0.3s",
-              fontFamily: "'Outfit', sans-serif",
-            }}
-          >
-            <span
+        {DOC_TYPES.map((doc) => {
+          const isActive = active === doc.key;
+          return (
+            <button
+              key={doc.key}
+              onClick={() => setActive(doc.key)}
               style={{
-                marginRight: isMobile ? "4px" : "8px",
-                opacity: active === doc.key ? 1 : 0.6,
+                padding: "12px 18px",
+                background: isActive ? "rgba(212, 175, 55, 0.08)" : "transparent",
+                color: isActive ? "#d4af37" : "#94a3b8",
+                border: "none",
+                borderBottom: isActive ? "2.5px solid #d4af37" : "2.5px solid transparent",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: isActive ? "700" : "500",
+                letterSpacing: "0.02em",
+                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                transition: "all 0.2s ease",
+                fontFamily: "'Inter', sans-serif",
               }}
             >
-              {doc.icon}
-            </span>
-            {doc[lang]}
-          </button>
-        ))}
+              <span>{doc.icon}</span>
+              <span>{doc[lang]}</span>
+            </button>
+          );
+        })}
       </nav>
 
-      {/* ===== MAIN CONTENT ===== */}
-      <main
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: isMobile ? "16px" : "48px",
-          minHeight: "calc(100vh - 200px)",
-          background: "radial-gradient(circle at top right, #1e293b, #0f172a)",
-        }}
-      >
-        {/* Config Panel */}
+      {/* ===== MOBILE SWITCHER BAR (Visible on screens < 1024px) ===== */}
+      {isMobile && (
         <div
           style={{
-            ...S.ui.formPanel,
-            maxWidth: "720px",
-            padding: isMobile ? "16px" : "28px",
-            borderRadius: isMobile ? "12px" : "16px",
+            background: "#0f172a",
+            padding: "8px 16px",
+            display: "flex",
+            gap: "8px",
+            borderBottom: "1px solid #1e2638",
+            position: "sticky",
+            top: "109px",
+            zIndex: 85,
           }}
         >
-          <DynamicForm
-            activeDoc={active}
-            data={docData[active as keyof typeof SAMPLE]}
-            lang={lang}
-            onChange={handleDataChange}
-            instData={instState}
-            onInstChange={handleInstChange}
-          />
+          <button
+            onClick={() => setMobileTab("preview")}
+            style={{
+              flex: 1,
+              padding: "8px",
+              borderRadius: "6px",
+              border: "1px solid",
+              borderColor: mobileTab === "preview" ? "#d4af37" : "#334155",
+              background: mobileTab === "preview" ? "rgba(212, 175, 55, 0.15)" : "#080c14",
+              color: mobileTab === "preview" ? "#d4af37" : "#94a3b8",
+              fontSize: "12px",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
+          >
+            👁️ Vista Previa en Vivo
+          </button>
+          <button
+            onClick={() => setMobileTab("editor")}
+            style={{
+              flex: 1,
+              padding: "8px",
+              borderRadius: "6px",
+              border: "1px solid",
+              borderColor: mobileTab === "editor" ? "#d4af37" : "#334155",
+              background: mobileTab === "editor" ? "rgba(212, 175, 55, 0.15)" : "#080c14",
+              color: mobileTab === "editor" ? "#d4af37" : "#94a3b8",
+              fontSize: "12px",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
+          >
+            ✏️ Editor & Ajustes
+          </button>
         </div>
+      )}
 
-        {/* Hidden preview for print */}
-        <div style={{ display: "none" }}>
-          <div id="doc-preview">{renderDocument()}</div>
-        </div>
-      </main>
-
-      {/* ===== FOOTER ===== */}
-      <footer
+      {/* ===== MAIN STUDIO SPLIT VIEW ===== */}
+      <main
+        className="studio-split-layout"
         style={{
-          textAlign: "center",
-          padding: isMobile ? "24px 16px" : "40px",
-          color: "#475569",
-          fontSize: "12px",
-          fontWeight: "500",
-          letterSpacing: "0.05em",
-          fontFamily: "'Inter', sans-serif",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
+          display: "flex",
+          flex: 1,
+          minHeight: "calc(100vh - 120px)",
+          background: "#070a12",
         }}
       >
-        <div
-          style={{ color: "#c9a84c", marginBottom: "8px", fontWeight: "700" }}
-        >
-          WESTERN OREGON UNIVERSITY
+        {/* LEFT / CENTER: INTERACTIVE LIVE DOCUMENT CANVAS */}
+        {(!isMobile || mobileTab === "preview") && (
+          <section
+            className="studio-preview-panel"
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              borderRight: isMobile ? "none" : "1px solid #1e2638",
+              minWidth: 0,
+            }}
+          >
+            {/* Canvas Toolbar (Zoom & Status) */}
+            <div
+              style={{
+                padding: "10px 24px",
+                background: "rgba(13, 19, 31, 0.8)",
+                backdropFilter: "blur(8px)",
+                borderBottom: "1px solid #1e2638",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "11px", color: "#94a3b8", fontFamily: "'JetBrains Mono', monospace" }}>
+                  DOCUMENTO:
+                </span>
+                <span style={{ fontSize: "11px", fontWeight: "700", color: "#f8fafc" }}>
+                  {DOC_TYPES.find((d) => d.key === active)?.[lang]}
+                </span>
+                <span style={{ fontSize: "10px", color: "#64748b" }}>· A4 / US Letter (300 DPI)</span>
+              </div>
+
+              {/* Zoom Controls */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <button
+                  onClick={() => setZoom(Math.max(0.45, zoom - 0.08))}
+                  title="Alejar"
+                  style={{
+                    background: "#080c14",
+                    color: "#cbd5e1",
+                    border: "1px solid #1e2638",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "700",
+                  }}
+                >
+                  -
+                </button>
+                <span style={{ fontSize: "11px", color: "#d4af37", width: "42px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}>
+                  {Math.round(zoom * 100)}%
+                </span>
+                <button
+                  onClick={() => setZoom(Math.min(1.25, zoom + 0.08))}
+                  title="Acercar"
+                  style={{
+                    background: "#080c14",
+                    color: "#cbd5e1",
+                    border: "1px solid #1e2638",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "700",
+                  }}
+                >
+                  +
+                </button>
+                <button
+                  onClick={() => setZoom(0.85)}
+                  title="Ajustar a 85%"
+                  style={{
+                    background: "#080c14",
+                    color: "#94a3b8",
+                    border: "1px solid #1e2638",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "10.5px",
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                  }}
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            {/* Document Sheet Desk Container */}
+            <div
+              className="document-desk-container"
+              style={{
+                flex: 1,
+                padding: "36px 16px 60px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                overflowY: "auto",
+                overflowX: "auto",
+              }}
+            >
+              <div
+                className="document-sheet-wrapper"
+                ref={previewRef}
+                style={{
+                  transform: `scale(${zoom})`,
+                  transformOrigin: "top center",
+                  transition: "transform 0.15s ease-out",
+                  margin: "0 auto",
+                }}
+              >
+                <div id="doc-preview">
+                  {renderDocument()}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* RIGHT: SWISS EDITORIAL PRECISION EDITOR */}
+        {(!isMobile || mobileTab === "editor") && (
+          <aside
+            className="studio-editor-panel"
+            style={{
+              width: isMobile ? "100%" : "440px",
+              background: "#0a0e17",
+              display: "flex",
+              flexDirection: "column",
+              overflowY: "auto",
+              padding: "24px",
+              boxSizing: "border-box",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px", borderBottom: "1px solid #1e2638", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "14px" }}>⚙️</span>
+                <h2 style={{ fontSize: "13px", fontWeight: "800", color: "#f8fafc", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: "'JetBrains Mono', monospace" }}>
+                  {lang === "en" ? "Document Customizer" : "Personalizar Documento"}
+                </h2>
+              </div>
+              <span style={{ fontSize: "10.5px", color: "#d4af37", fontFamily: "'JetBrains Mono', monospace" }}>
+                LIVE SYNC
+              </span>
+            </div>
+
+            {/* Photo Upload Section (Especially handy for Student ID Card) */}
+            {active === "studentCard" && (
+              <div
+                style={{
+                  background: "#080c14",
+                  border: "1px solid #1e2638",
+                  borderRadius: "8px",
+                  padding: "14px",
+                  marginBottom: "20px",
+                }}
+              >
+                <div style={{ fontSize: "10.5px", fontWeight: "700", color: "#d4af37", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px", fontFamily: "'JetBrains Mono', monospace" }}>
+                  📸 {lang === "en" ? "Student ID Portrait" : "Foto del Estudiante"}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                  <img
+                    src={(docData.studentCard as any)?.photo || "./assets/student_portrait.webp"}
+                    alt="Current Portrait"
+                    style={{
+                      width: "48px",
+                      height: "56px",
+                      borderRadius: "6px",
+                      objectFit: "cover",
+                      border: "1.5px solid #d4af37",
+                    }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <label
+                      style={{
+                        display: "inline-block",
+                        background: "#1e2638",
+                        color: "#f8fafc",
+                        padding: "6px 12px",
+                        borderRadius: "5px",
+                        fontSize: "11px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        border: "1px solid #334155",
+                      }}
+                    >
+                      {lang === "en" ? "Upload Custom Photo" : "Subir Otra Foto"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        style={{ display: "none" }}
+                      />
+                    </label>
+                    <button
+                      onClick={() => {
+                        const current = docData.studentCard as any;
+                        handleDataChange({ ...current, photo: "./assets/student_portrait.webp" });
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#64748b",
+                        fontSize: "10px",
+                        marginLeft: "8px",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Default
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Dynamic Form for Current Active Document */}
+            <div style={{ flex: 1 }}>
+              <DynamicForm
+                activeDoc={active}
+                data={docData[active as keyof typeof SAMPLE]}
+                lang={lang}
+                onChange={handleDataChange}
+                instData={instState}
+                onInstChange={handleInstChange}
+              />
+            </div>
+          </aside>
+        )}
+      </main>
+
+      {/* ===== SWISS FOOTER ===== */}
+      <footer
+        style={{
+          background: "#060910",
+          borderTop: "1px solid #1e2638",
+          padding: "14px 28px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontSize: "11px",
+          color: "#475569",
+          fontFamily: "'Inter', sans-serif",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <span style={{ color: "#d4af37", fontWeight: "700" }}>WESTERN OREGON UNIVERSITY</span>
+          <span>·</span>
+          <span>Office of the Registrar (Monmouth, Oregon)</span>
         </div>
-        Office of the Registrar — Monmouth, Oregon © {new Date().getFullYear()}
+        <div>
+          Official Digital Records System © {new Date().getFullYear()}
+        </div>
       </footer>
     </div>
   );
