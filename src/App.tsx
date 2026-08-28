@@ -61,7 +61,15 @@ export default function App() {
   const [term, setTerm] = useState("Spring 2025");
   const [delivery, setDelivery] = useState("Digital PDF (300 DPI)");
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [zoom, setZoom] = useState(0.85);
+  const [zoom, setZoom] = useState(() => {
+    if (typeof window !== "undefined") {
+      if (window.innerWidth >= 1440) return 0.85;
+      if (window.innerWidth >= 1200) return 0.74;
+      if (window.innerWidth >= 900) return 0.62;
+      return 0.5;
+    }
+    return 0.85;
+  });
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Auto-fit zoom on window resize
