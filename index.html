@@ -13,21 +13,52 @@
     content="Western Oregon University — Official student document portal for enrollment verification, transcripts, and academic records." />
   <meta name="author" content="Western Oregon University — Office of the Registrar" />
   <title>WOU Academic Document Studio · Official Student Portal</title>
-  <!-- Preload critical assets for instantaneous render -->
+
+  <!-- Preload critical assets -->
   <link rel="preload" as="image" href="./assets/wou-logo.webp" type="image/webp" />
   <link rel="preload" as="image" href="./assets/student_portrait.webp" type="image/webp" />
+
+  <!-- Critical Synchronous CSS to prevent ANY Flash of Unstyled Content (FOUC) or color jumps -->
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg-studio: #080c14;
+      --panel-bg: #0d131f;
+      --gold-accent: #d4af37;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #080c14 !important;
+      color: #f8fafc !important;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #root {
+      min-height: 100vh;
+      background-color: #080c14 !important;
+    }
+    /* Anti-dark mode & color isolation applied synchronously at byte 0 */
+    #doc-preview,
+    #doc-preview *,
+    .document-sheet-wrapper,
+    .document-sheet-wrapper *,
+    [data-theme="paper"],
+    [data-theme="paper"] * {
+      color-scheme: only light !important;
+      forced-color-adjust: none !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      background-color: #faf9f5 !important;
+      color: #0f172a !important;
+    }
+  </style>
+
+  <!-- Direct High-Priority Google Fonts (No media=print delay) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style"
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Great+Vibes&family=Libre+Barcode+39&display=swap" />
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Great+Vibes&family=Libre+Barcode+39&display=swap"
-    rel="stylesheet" media="print" onload="this.media='all'" />
-  <noscript>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Great+Vibes&family=Libre+Barcode+39&display=swap"
-      rel="stylesheet" />
-  </noscript>
+    rel="stylesheet" />
 </head>
 
 <body>
