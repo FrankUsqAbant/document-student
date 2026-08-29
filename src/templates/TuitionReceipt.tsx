@@ -161,7 +161,7 @@ export const TuitionReceipt: React.FC<TuitionReceiptProps> = ({
         }}
       >
         {institution.countryCode === "pe"
-          ? "Comprobante oficial de pago emitido por la Oficina de Tesorería de la Universidad Nacional de Trujillo. Exonerado del IGV conforme al Artículo 19° del TUO de la Ley del Impuesto a la Renta (Entidad Educativa Ley N° 30220). RUC UNT: 20172557628."
+          ? "Comprobante oficial de pago emitido por la Oficina de Tesorería de la Universidad Nacional de Ucayali. Exonerado del IGV conforme al Artículo 19° del TUO de la Ley del Impuesto a la Renta (Entidad Educativa Ley N° 30220). RUC UNU: 20172557628."
           : institution.countryCode === "ca"
           ? "Official receipt issued by Simon Fraser University Student Accounts. Retain this statement for Canadian T2202 Tuition and Enrolment Certificate tax purposes (CRA compliant)."
           : institution.countryCode === "in"

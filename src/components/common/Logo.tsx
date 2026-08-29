@@ -36,37 +36,51 @@ export const Logo: React.FC<LogoProps> = ({ src, size = 78, institution }) => {
 
   const countryCode = institution?.countryCode || "us";
 
-  // 1. PERÚ: Universidad Nacional de Trujillo (UNT) Official Emblem
-  if (countryCode === "pe" || institution?.id === "unt-pe") {
+  // 1. PERÚ: Universidad Nacional de Ucayali (UNU) Official Emblem
+  if (countryCode === "pe" || institution?.id === "unu-pe" || institution?.id === "unt-pe") {
     return (
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="48" fill="#ffffff" stroke="#991b1b" strokeWidth="3" />
-        <circle cx="50" cy="50" r="44" fill="#faf5f5" stroke="#c9a84c" strokeWidth="1" strokeDasharray="2 2" />
-        {/* Radiant Sun of Peru */}
-        <circle cx="50" cy="32" r="9" fill="#f59e0b" stroke="#d97706" strokeWidth="1" />
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, idx) => (
+        {/* Outer Ring in Amazonian Green and Gold */}
+        <circle cx="50" cy="50" r="48" fill="#ffffff" stroke="#047857" strokeWidth="3" />
+        <circle cx="50" cy="50" r="44" fill="#f0fdf4" stroke="#d97706" strokeWidth="1.2" strokeDasharray="2.5 1.5" />
+
+        {/* Amazonian Sun & Rays */}
+        <circle cx="50" cy="30" r="8" fill="#f59e0b" stroke="#d97706" strokeWidth="0.8" />
+        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, idx) => (
           <line
             key={idx}
             x1="50"
-            y1="32"
-            x2={50 + 13 * Math.cos((angle * Math.PI) / 180)}
-            y2={32 + 13 * Math.sin((angle * Math.PI) / 180)}
+            y1="30"
+            x2={50 + 11 * Math.cos((angle * Math.PI) / 180)}
+            y2={30 + 11 * Math.sin((angle * Math.PI) / 180)}
             stroke="#f59e0b"
-            strokeWidth="1.5"
+            strokeWidth="1.2"
             strokeLinecap="round"
           />
         ))}
+
+        {/* Sacred Flame of Science & Wisdom (Torch of UNU) */}
+        <path d="M50 22 C53 26 56 29 56 34 C56 38 53 41 50 43 C47 41 44 38 44 34 C44 29 47 26 50 22 Z" fill="#ef4444" />
+        <path d="M50 26 C51.5 29 53 31 53 34 C53 36 51.5 38 50 39 C48.5 38 47 36 47 34 C47 31 48.5 29 50 26 Z" fill="#fde047" />
+
         {/* Open Book of Knowledge */}
-        <path d="M34 50 Q50 46 50 52 Q50 46 66 50 L66 68 Q50 64 50 70 Q50 64 34 68 Z" fill="#ffffff" stroke="#991b1b" strokeWidth="1.5" />
-        <line x1="50" y1="52" x2="50" y2="70" stroke="#991b1b" strokeWidth="1.5" />
-        {/* Green Laurel Branches */}
-        <path d="M26 62 C24 50 28 36 34 28" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
-        <path d="M74 62 C76 50 72 36 66 28" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
-        {/* UNT Text */}
-        <text x="50" y="63" textAnchor="middle" fill="#991b1b" fontSize="9" fontWeight="900" fontFamily="'Inter', sans-serif" letterSpacing="0.5">UNT</text>
-        {/* Banner */}
-        <rect x="26" y="77" width="48" height="12" rx="2" fill="#991b1b" />
-        <text x="50" y="85.5" textAnchor="middle" fill="#ffffff" fontSize="6.5" fontWeight="800" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.8">PERÚ · 1824</text>
+        <path d="M33 46 Q50 42 50 48 Q50 42 67 46 L67 62 Q50 58 50 64 Q50 58 33 62 Z" fill="#ffffff" stroke="#047857" strokeWidth="1.5" />
+        <line x1="50" y1="48" x2="50" y2="64" stroke="#047857" strokeWidth="1.5" />
+
+        {/* Amazonian River Ucayali Waves */}
+        <path d="M36 67 Q43 64 50 67 Q57 70 64 67" stroke="#0284c7" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        <path d="M38 71 Q44 68 50 71 Q56 74 62 71" stroke="#0284c7" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+
+        {/* Amazon Laurel / Palm Fronds */}
+        <path d="M25 58 C23 46 27 34 33 26" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <path d="M75 58 C77 46 73 34 67 26" stroke="#059669" strokeWidth="2" fill="none" strokeLinecap="round" />
+
+        {/* UNU Monogram */}
+        <text x="50" y="58" textAnchor="middle" fill="#065f46" fontSize="9.5" fontWeight="900" fontFamily="'Inter', sans-serif" letterSpacing="0.8">UNU</text>
+
+        {/* Bottom Year and City Banner */}
+        <rect x="24" y="78" width="52" height="12" rx="2" fill="#047857" stroke="#d97706" strokeWidth="0.8" />
+        <text x="50" y="86.5" textAnchor="middle" fill="#ffffff" fontSize="6.2" fontWeight="800" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.8">PUCALLPA · 1979</text>
       </svg>
     );
   }
