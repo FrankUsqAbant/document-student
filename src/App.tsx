@@ -403,7 +403,7 @@ export default function App() {
                   return (
                     <button
                       key={univ.id}
-                      onClick={() => setInstState(univ)}
+                      onClick={() => handleInstChange(univ)}
                       style={{
                         padding: "8px 10px",
                         borderRadius: "6px",

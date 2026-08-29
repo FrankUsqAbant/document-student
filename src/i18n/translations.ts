@@ -69,7 +69,7 @@ const translations = {
     chargesDetail: "Charges Detail",
     code: "Code",
     concept: "Concept",
-    amount: "Amount ($)",
+    amount: "Amount",
     totalPaid: "TOTAL AMOUNT",
     statusPaid: "✓ PAID",
     tuitionNote:
@@ -207,7 +207,7 @@ const translations = {
     chargesDetail: "Detalle de Cobros",
     code: "Código",
     concept: "Concepto",
-    amount: "Monto (₡)",
+    amount: "Monto",
     totalPaid: "MONTO TOTAL CANCELADO",
     statusPaid: "✓ CANCELADO",
     tuitionNote:
